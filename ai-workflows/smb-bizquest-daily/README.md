@@ -1,8 +1,15 @@
 # BizQuest Daily Alert System
 
-**An n8n workflow that scrapes new BizQuest listings every morning, scores each one against your buy box with Claude, drafts a personalized broker message for the good ones, and drops it all in your Slack.**
+**An [n8n](https://n8n.partnerlinks.io/qsoyb0o2mh2x) workflow that scrapes new BizQuest listings every morning, scores each one against your buy box with Claude, drafts a personalized broker message for the good ones, and drops it all in your Slack.**
 
 ![The full workflow in n8n — schedule & buy box, rank/loop/dedupe, score buyer fit, draft broker outreach, log and post to Slack](assets/n8n-workflow.png)
+
+> ### 🚀 This runs on [n8n](https://n8n.partnerlinks.io/qsoyb0o2mh2x) — here's the 60-second path
+>
+> 1. **[Get n8n](https://n8n.partnerlinks.io/qsoyb0o2mh2x)** (cloud or self-hosted) and open it.
+> 2. **Download [`smb-bizquest-daily.json`](smb-bizquest-daily.json)** from this folder (the **Download raw file** button).
+> 3. In [n8n](https://n8n.partnerlinks.io/qsoyb0o2mh2x): **Workflows → ⋯ → Import from File** and select that JSON.
+> 4. Wire your credentials and config in the [**Setup**](#setup-about-20-minutes) steps below, then toggle **Active**.
 
 ---
 
@@ -60,7 +67,7 @@ Score 1–3 listings are logged to the Sheet for audit but never ping you and ne
 | Google Sheets | Free | Master list, dedupe, audit trail |
 | Slack | Free | Where the daily alert lands |
 
-**All in: ~$25–30/month** — n8n's Starter plan is the bulk of it. The daily scrape and Haiku/Sonnet on a handful of listings add just a couple dollars, and Sheets and Slack are free.
+**All in: ~$25–30/month** — [n8n](https://n8n.partnerlinks.io/qsoyb0o2mh2x)'s Starter plan is the bulk of it. The daily scrape and Haiku/Sonnet on a handful of listings add just a couple dollars, and Sheets and Slack are free.
 
 > ⚠️ **Terms of Use warning — use at your own risk.** BizQuest prohibits scraping. This workflow relies on a third-party Apify scraper. Account suspension is your problem. Practical guardrails: once-a-day schedule, narrow criteria, never republish raw data or spam brokers.
 
@@ -68,7 +75,7 @@ Score 1–3 listings are logged to the Sheet for audit but never ping you and ne
 
 ## Setup (about 20 minutes)
 
-1. **Import the workflow.** Download [`smb-bizquest-daily.json`](smb-bizquest-daily.json) and import it into n8n (**Workflows → ⋯ → Import from File**).
+1. **Import the workflow.** Download [`smb-bizquest-daily.json`](smb-bizquest-daily.json) and import it into [n8n](https://n8n.partnerlinks.io/qsoyb0o2mh2x) (**Workflows → ⋯ → Import from File**).
 
 2. **Create a Google Sheet** with this 16-column header row, in order:
    ```

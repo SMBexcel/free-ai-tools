@@ -37,7 +37,7 @@ More shipping soon — see the [SMBexcel newsletter](https://www.smbexcel.com) f
 Each tool is a self-contained folder with its own `README.md` covering setup. The short version:
 
 - **Skills** → download the folder's `<skill>-vX.Y.zip` (or clone the repo), drop it into your Claude skills directory (`~/.claude/skills/` for Claude Code), then follow the skill's README.
-- **Workflows** → download the folder's `<workflow>.json`, import it into n8n (**Workflows → ⋯ → Import from File**), wire your credentials, and go.
+- **Workflows** → download the folder's `<workflow>.json`, import it into [n8n](https://n8n.partnerlinks.io/qsoyb0o2mh2x) (**Workflows → ⋯ → Import from File**), wire your credentials, and go.
 
 Full per-category instructions live in [`claude-skills/`](./claude-skills) and [`ai-workflows/`](./ai-workflows).
 

@@ -2,7 +2,7 @@
 
 Open-source [n8n](https://n8n.partnerlinks.io/qsoyb0o2mh2x) workflows built and maintained by [SMBexcel](https://www.smbexcel.com).
 
-Each workflow is a self-contained folder with an importable `.json` and its own `README.md` covering setup, credentials, and customization. Drop the JSON into n8n, wire your credentials, and go.
+Each workflow is a self-contained folder with an importable `.json` and its own `README.md` covering setup, credentials, and customization. Drop the JSON into [n8n](https://n8n.partnerlinks.io/qsoyb0o2mh2x), wire your credentials, and go.
 
 ---
 
@@ -20,7 +20,7 @@ More shipping soon — see the [SMBexcel newsletter](https://www.smbexcel.com) f
 
 1. Open the workflow folder above (e.g. [`smb-bizquest-daily`](./smb-bizquest-daily)).
 2. Download its `<workflow>.json` → **Download raw file**.
-3. In n8n: **Workflows → ⋯ → Import from File** and select the JSON.
+3. In [n8n](https://n8n.partnerlinks.io/qsoyb0o2mh2x): **Workflows → ⋯ → Import from File** and select the JSON.
 4. Follow the workflow's `README.md` to wire credentials and edit the config nodes.
 
 ---
