@@ -2,7 +2,7 @@
 
 **An n8n workflow that scrapes new BizQuest listings every morning, scores each one against your buy box with Claude, drafts a personalized broker message for the good ones, and drops it all in your Slack.**
 
-![The workflow running in n8n](assets/demo.gif)
+![The full workflow in n8n — schedule & buy box, rank/loop/dedupe, score buyer fit, draft broker outreach, log and post to Slack](assets/n8n-workflow.png)
 
 ---
 
