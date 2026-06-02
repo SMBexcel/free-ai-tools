@@ -1,17 +1,25 @@
-# SMBexcel Skills
+# SMBexcel — Skills & Workflows
 
-Open-source Claude skills built and maintained by [SMBexcel](https://www.smbexcel.com).
+Open-source Claude **skills** and n8n **workflows** built and maintained by [SMBexcel](https://www.smbexcel.com).
 
-Each skill is a self-contained folder you drop into your Claude skills directory. No build step, no install script — markdown all the way down.
+Skills are self-contained folders you drop into your Claude skills directory — no build step, no install script, markdown all the way down. Workflows are importable [n8n](https://n8n.partnerlinks.io/qsoyb0o2mh2x) automations that wire Claude into your daily search-and-buy operations.
 
 ---
 
-## Catalog
+## Skills
 
 | Skill | Version | What it does |
 |---|---|---|
 | [lemonade](./lemonade) | `1.2` | Plug-and-play persistent memory for Claude chats. Distill / rehydrate via a Notion database you own. Counters context rot. |
 | [smb-find-ibba](./smb-find-ibba) | `1.1` | Get every IBBA business broker (~2,800) into a single CSV — name, company, email, phone, website, location, credentials — from the directory's own public endpoints. No login, no cookie, no paid tool. Resumable, merges on re-run. Legal-posture briefing included. **Claude Code only.** |
+
+## Workflows
+
+n8n automations live under [`workflows/`](./workflows), each with its own README and importable JSON.
+
+| Workflow | Version | What it does |
+|---|---|---|
+| [smb-bizquest-daily](./workflows/smb-bizquest-daily) | `1.0` | Daily BizQuest scrape → Claude scores each listing against your buy box → drafts broker outreach for the strong fits → posts the shortlist to Slack, logs everything to a Google Sheet. |
 
 More shipping soon — see the [SMBexcel newsletter](https://www.smbexcel.com) for what's next.
 
