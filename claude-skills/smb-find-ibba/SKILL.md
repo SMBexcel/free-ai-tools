@@ -26,7 +26,7 @@ If you do NOT — e.g. you're in **claude.ai** or any chat environment without l
 
 > ⚠️ **This skill needs Claude Code — it can't run here.**
 >
-> smb-find-ibba runs a Python script on your own machine. That only works in Claude Code (the CLI). Install Claude Code, drop this skill into `~/.claude/skills/smb-find-ibba/`, and ask again there. Setup: https://github.com/SMBexcel/skills
+> smb-find-ibba runs a Python script on your own machine. That only works in Claude Code (the CLI). Install Claude Code, drop this skill into `~/.claude/skills/smb-find-ibba/`, and ask again there. Setup: https://github.com/SMBexcel/free-ai-tools
 
 ## Step 1 — Brief the user on legal posture (one opt-in)
 
@@ -81,7 +81,7 @@ The script prints final counts to stderr. Relay to the user:
 
 ## Failure modes
 
-- **Geo endpoint returns nothing / errors** → IBBA may have changed the endpoint or its parameters. Open the directory at https://www.ibba.org/find-a-business-broker/ in a browser; if it loads brokers, the endpoint or its query params changed and `GEO_URL` in `scripts/ibba_scraper.py` needs updating. Open an issue on SMBexcel/skills.
+- **Geo endpoint returns nothing / errors** → IBBA may have changed the endpoint or its parameters. Open the directory at https://www.ibba.org/find-a-business-broker/ in a browser; if it loads brokers, the endpoint or its query params changed and `GEO_URL` in `scripts/ibba_scraper.py` needs updating. Open an issue on SMBexcel/free-ai-tools.
 - **Many rows show `no_email`** → check a few of those profile URLs in a browser. If the email is visible there but not captured, IBBA changed the profile page markup and the hidden-input regex / field map in `parse_profile()` needs updating. If the profile genuinely shows no email, it's the broker's own omission — normal.
 - **Errors on some rows** → transient network/timeouts. Just re-run `emails` — it resumes and retries only the errored/missing profiles.
 - **Tried to run it in claude.ai** → won't work; stop at the environment check and switch to Claude Code.

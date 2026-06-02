@@ -10,12 +10,6 @@
 
 Self-funded searchers lose an hour a day checking BizQuest — and still miss the ones that move to LOI before they see them. The listing page doesn't tell you whether it fits your **buy box**, and a generic *"interested, please send more info"* broker message gets deleted.
 
-This is the grind it replaces:
-
-<p align="center">
-  <img src="assets/before-manual-process.png" alt="The manual process: open emails, scan, sign in, read deal details, decide if it's a match, draft a message, submit the broker form, wait for an NDA, repeat" width="360">
-</p>
-
 ## The solution
 
 A daily workflow that filters new BizQuest listings against your buy box, scores each one for buyer fit, and drafts a personalized broker outreach for every listing worth pursuing. Lands in your Slack.
@@ -41,22 +35,9 @@ Your buy box lives in one place. Tune it, and the next morning's alerts reflect 
 
 ## How it works
 
-```
-Schedule (5am daily)
-      │
-      ▼
-Scrape BizQuest (Apify)  ──►  Normalize & impute SDE  ──►  Rank by SDE, top 100
-      │
-      ▼
-Loop each listing  ──►  Already in Sheet?  ──► yes ─► skip
-      │ no
-      ▼
-Score buyer fit 1–5 (Claude Haiku)  ──►  log every listing to Sheet
-      │
-      ├─ score 1–3 ─►  Sheet only (no ping, no draft)
-      │
-      └─ score 4–5 ─►  Draft broker outreach (Claude Sonnet)  ──►  Sheet + Slack alert
-```
+<p align="center">
+  <img src="assets/after-automated-flow.png" alt="Automated flow: runs daily on autopilot, scrapes BizQuest, filters on your buy-box, normalizes data and imputes SDE, ranks the top SDE deals, loops results while skipping already-seen listings, scores each new one with Haiku 4.5 against your buy box, saves to Google Sheet, then if the score is 4 or higher writes a broker outreach with Sonnet 4.6 and sends a Slack DM you can copy and paste in one click — lower scores are logged but deprioritized" width="300">
+</p>
 
 - **Daily scrape** of new BizQuest listings matching your buy box filters
 - **Normalize and dedupe** against your master Sheet so already-seen listings drop out silently (canonicalized listing URL is the unique key)

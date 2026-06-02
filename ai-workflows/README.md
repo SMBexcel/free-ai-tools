@@ -1,4 +1,4 @@
-# SMBexcel Workflows
+# AI Workflows
 
 Open-source [n8n](https://n8n.partnerlinks.io/qsoyb0o2mh2x) workflows built and maintained by [SMBexcel](https://www.smbexcel.com).
 

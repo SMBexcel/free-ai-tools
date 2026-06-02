@@ -41,7 +41,7 @@ The memory lives in a **Notion database you own**, not in Claude. It survives mo
 
 ### Quickest path — direct zip download
 
-1. **Download:** [lemonade-v1.2.zip](https://github.com/SMBexcel/skills/raw/main/lemonade/lemonade-v1.2.zip) (committed in this folder — single click, no Release page needed).
+1. **Download:** [lemonade-v1.2.zip](https://github.com/SMBexcel/free-ai-tools/raw/main/claude-skills/lemonade/lemonade-v1.2.zip) (committed in this folder — single click, no Release page needed).
 2. **Unzip** — you'll get a `lemonade/` folder containing `SKILL.md` and `references/`.
 3. **Drop it into your Claude skills directory:**
    - **Claude Code:** `~/.claude/skills/lemonade/`
@@ -52,8 +52,8 @@ The memory lives in a **Notion database you own**, not in Claude. It survives mo
 ### Alternative — clone the whole repo
 
 ```bash
-git clone https://github.com/SMBexcel/skills.git
-cp -R skills/lemonade ~/.claude/skills/
+git clone https://github.com/SMBexcel/free-ai-tools.git
+cp -R free-ai-tools/claude-skills/lemonade ~/.claude/skills/
 ```
 
 Then enable the Notion connector and run the smoke test above.

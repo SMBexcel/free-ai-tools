@@ -68,7 +68,7 @@ Output: `./ibba-export/ibba_brokers.csv` — one row per broker, with —
 
 ### Quickest path — direct zip download
 
-1. **Download:** [smb-find-ibba-v1.1.zip](https://github.com/SMBexcel/skills/raw/main/smb-find-ibba/smb-find-ibba-v1.1.zip)
+1. **Download:** [smb-find-ibba-v1.1.zip](https://github.com/SMBexcel/free-ai-tools/raw/main/claude-skills/smb-find-ibba/smb-find-ibba-v1.1.zip)
 2. **Unzip** — you'll get an `smb-find-ibba/` folder containing `SKILL.md` and `scripts/`.
 3. **Drop it into** `~/.claude/skills/smb-find-ibba/`.
 4. **Smoke test** — in any new Claude Code chat say: *"get IBBA broker emails into a CSV"*. The skill starts with the environment check and legal briefing.
@@ -76,8 +76,8 @@ Output: `./ibba-export/ibba_brokers.csv` — one row per broker, with —
 ### Alternative — clone the whole repo
 
 ```bash
-git clone https://github.com/SMBexcel/skills.git
-cp -R skills/smb-find-ibba ~/.claude/skills/
+git clone https://github.com/SMBexcel/free-ai-tools.git
+cp -R free-ai-tools/claude-skills/smb-find-ibba ~/.claude/skills/
 ```
 
 ---
@@ -127,7 +127,7 @@ The full briefing is shown by the skill at runtime — you can't skip it.
 
 ## Failure modes
 
-- **Geo endpoint returns nothing** → IBBA changed the endpoint/params. Open the directory in a browser; if it loads, update `GEO_URL` in `scripts/ibba_scraper.py`. Open an issue on SMBexcel/skills.
+- **Geo endpoint returns nothing** → IBBA changed the endpoint/params. Open the directory in a browser; if it loads, update `GEO_URL` in `scripts/ibba_scraper.py`. Open an issue on SMBexcel/free-ai-tools.
 - **Many `no_email` rows** → spot-check a few in a browser. If emails show there but weren't captured, IBBA changed the profile markup and the regex/field map in `parse_profile()` needs updating. If the profile genuinely lists no email, that's the broker's omission — normal.
 - **Some rows errored** → transient timeouts; just re-run `emails`, it resumes and retries only what's missing.
 - **Tried to run it in claude.ai** → won't work; switch to Claude Code.
