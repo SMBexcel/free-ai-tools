@@ -54,11 +54,13 @@ Score 1–3 listings are logged to the Sheet for audit but never ping you and ne
 
 | Tool | Cost | Why |
 |------|------|-----|
-| [n8n](https://n8n.partnerlinks.io/qsoyb0o2mh2x) | Cloud or self-hosted | Where this runs |
-| [Apify](https://apify.com/memo23/bizquest-scraper) | ~$2–5/day | BizQuest scraper |
-| Anthropic API | ~$50–80/month | Scoring + outreach drafting |
+| [n8n](https://n8n.partnerlinks.io/qsoyb0o2mh2x) | Free (self-hosted) | Where this runs |
+| [Apify](https://apify.com/memo23/bizquest-scraper) | <$2/mo (free tier usually covers it) | BizQuest scraper |
+| Anthropic API | ~$1–2/mo | Scoring + outreach drafting |
 | Google Sheets | Free | Master list, dedupe, audit trail |
 | Slack | Free | Where the daily alert lands |
+
+**All in: under $5/month.** A once-daily scrape and Haiku/Sonnet on a handful of listings costs pennies a day; everything else runs on free tiers.
 
 > ⚠️ **Terms of Use warning — use at your own risk.** BizQuest prohibits scraping. This workflow relies on a third-party Apify scraper. Account suspension is your problem. Practical guardrails: once-a-day schedule, narrow criteria, never republish raw data or spam brokers.
 
