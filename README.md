@@ -20,6 +20,7 @@ Two kinds of tools live here:
 | [lemonade](./claude-skills/lemonade) | `1.2` | Plug-and-play persistent memory for Claude chats. Distill / rehydrate via a Notion database you own. Counters context rot. |
 | [smb-find-ibba](./claude-skills/smb-find-ibba) | `1.1` | Get every IBBA business broker (~2,800) into a single CSV — name, company, email, phone, website, location, credentials — from the directory's own public endpoints. No login, no cookie, no paid tool. Resumable, merges on re-run. **Claude Code only.** |
 | [smb-free-website](./claude-skills/smb-free-website) | `1.0` | A real, distinctive small-business website live at your own free URL in ~20 minutes. Claude scaffolds Astro, designs through a self-improving screenshot-driven loop, then walks you through GitHub + Cloudflare. No credit card, no design experience, no `gh` or Homebrew install. **Claude Code only.** |
+| [sms-free-imessage-agent](./claude-skills/sms-free-imessage-agent) | `1.0` | Stand up your own AI sales/concierge agent on iMessage & SMS in ~40 minutes. Answers 24/7, captures leads, books calls, and remembers customers — on infrastructure you own (Cloudflare Workers + Blooio + Supabase + Claude), for pennies per conversation. Ships a working TypeScript template and an optional referral engine. **Claude Code only.** |
 
 ## ⚙️ AI Workflows
 
