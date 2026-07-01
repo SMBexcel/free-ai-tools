@@ -1,0 +1,20 @@
+# Local dev secrets for `wrangler dev`. Copy to `.dev.vars` and fill in.
+# In production these are set with `wrangler secret put <NAME>` (one at a time),
+# NOT committed. See setup/ in the skill for where each value comes from.
+
+# Blooio (the iMessage/SMS gateway)
+BLOOIO_API_KEY=
+BLOOIO_HMAC_SECRET=
+
+# Anthropic (the agent model)
+ANTHROPIC_API_KEY=
+
+# Supabase (server-side data layer — SERVICE ROLE key, never a client key)
+SUPABASE_SERVICE_ROLE_KEY=
+
+# Internal shared secret gating /internal/agent/run (generate: openssl rand -hex 32)
+OPS_BEARER_TOKEN=
+
+# Optional observability
+SENTRY_DSN=
+SLACK_OPS_WEBHOOK_URL=

@@ -1,0 +1,60 @@
+name = "imessage-agent"
+main = "src/index.ts"
+compatibility_date = "2026-04-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Inline *.md files as string default exports (esbuild's text loader) so the
+# agent system prompt (src/prompts/agent-system.md) can be `import`ed directly.
+rules = [
+  { type = "Text", globs = ["**/*.md"], fallthrough = true },
+]
+
+# Cloudflare Workers Logs (the live tail + dashboard panel).
+[observability]
+enabled = true
+
+# ── Durable Object: the per-phone InboundCoalescer (debounce + rate limit). ──
+# SQLite-backed DO class. The binding is declared below; this registers the class.
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["InboundCoalescer"]
+
+[[durable_objects.bindings]]
+name = "INBOUND_COALESCER"
+class_name = "InboundCoalescer"
+
+# ── SELF: a service binding to THIS Worker. ──
+# The DO alarm calls back into the Worker over this binding to run the agent on a
+# fresh isolate. `service` must equal `name` above.
+[[services]]
+binding = "SELF"
+service = "imessage-agent"
+
+# ── Public config (non-secret). Edit these for your deployment. ──
+[vars]
+ENVIRONMENT = "production"
+# Set this to your deployed Worker URL AFTER the first `wrangler deploy`
+# (e.g. https://imessage-agent.YOUR-SUBDOMAIN.workers.dev). It is the base the
+# DO uses to call /internal/agent/run, and what you register as the Blooio webhook.
+WORKER_BASE_URL = "https://imessage-agent.YOUR-SUBDOMAIN.workers.dev"
+SUPABASE_URL = "https://YOUR-PROJECT.supabase.co"
+ANTHROPIC_MODEL_AGENT = "claude-sonnet-4-6"
+# Injected into the system prompt wherever it says {{BUSINESS_NAME}}.
+BUSINESS_NAME = "Acme"
+# "true" to register the referral tools + reward hooks (needs migration 0002).
+REFERRAL_ENABLED = "false"
+# "true" to piggyback a Blooio contact card (name + avatar) on the first reply.
+# Requires a Blooio Dedicated plan + a card set on the number. "false" = no-op.
+SHARE_CONTACT_ENABLED = "false"
+
+# ── Secrets (DO NOT put here). Set with: wrangler secret put <NAME> ──
+#   BLOOIO_API_KEY            BLOOIO_HMAC_SECRET        ANTHROPIC_API_KEY
+#   SUPABASE_SERVICE_ROLE_KEY OPS_BEARER_TOKEN          SENTRY_DSN (optional)
+#   SLACK_OPS_WEBHOOK_URL (optional)
+# For local dev, put them in .dev.vars (see .dev.vars.example).
+
+# ── Optional cron triggers (Cloudflare account cap = 5). ──
+# One scheduled() handler is dispatched per cron string via CRON_HANDLERS in
+# src/index.ts. Uncomment to enable a daily job.
+# [triggers]
+# crons = ["0 13 * * *"]
