@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Second Brain</title>
+<meta name="description" content="An LLM wiki you can explore as a graph and an index.">
+<link rel="stylesheet" href="atlas.css">
+</head>
+<body>
+<div id="app">
+  <!-- LEFT: paper index / note reader -->
+  <section id="left">
+    <div id="searchbar">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M21 21l-4.3-4.3M11 19a8 8 0 100-16 8 8 0 000 16z"/></svg>
+      <input id="search" type="search" placeholder="Search notes…" autocomplete="off" spellcheck="false">
+      <kbd id="search-clear" hidden>esc</kbd>
+    </div>
+    <div id="left-scroll">
+      <div id="index-view">
+        <p class="eyebrow">— <b id="brand">Second Brain</b></p>
+        <h1 class="display" id="title">Second <em>brain.</em></h1>
+        <p class="intro" id="subtitle"></p>
+        <p class="counts" id="counts"></p>
+        <p class="disclaimer" id="disclaimer"></p>
+        <div class="filters">
+          <div class="filter-row">
+            <span class="filter-label">Type</span>
+            <div class="chips" id="type-chips"></div>
+          </div>
+          <button id="reset-all" title="Clear filters, search and graph view">↺ Reset all</button>
+        </div>
+        <p class="results-count" id="results-count"></p>
+        <ol id="episode-index"></ol>
+      </div>
+      <div id="detail-view" hidden></div>
+    </div>
+  </section>
+
+  <div id="divider" title="Drag to resize"></div>
+
+  <!-- RIGHT: the graph -->
+  <section id="right">
+    <div id="right-head">
+      <p class="eyebrow light">— Knowledge Graph</p>
+      <p class="constellation-sub" id="graph-sub"></p>
+    </div>
+    <div id="graph"></div>
+    <div id="gnav">
+      <button id="nav-home" title="Back to index" aria-label="Back to index">⌂</button>
+      <button id="nav-in" title="Zoom in" aria-label="Zoom in">+</button>
+      <button id="nav-out" title="Zoom out" aria-label="Zoom out">−</button>
+      <button id="nav-reset" title="Reset view" aria-label="Reset view">⤢</button>
+      <button id="nav-spin" title="Auto-rotate" aria-label="Auto-rotate">↻</button>
+    </div>
+    <div id="gfooter">
+      <div id="glegend"></div>
+      <p id="ghint">drag · scroll to zoom · <b>click a node</b></p>
+    </div>
+  </section>
+</div>
+<script src="vendor/marked.min.js"></script>
+<script src="vendor/3d-force-graph.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
