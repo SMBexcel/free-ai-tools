@@ -65,7 +65,7 @@ This is the retrieval engine. Every ingest updates it. Lint verifies it.
 
 ## Atlas config
 
-Read by `build_atlas.py` when publishing the graph site, and by
+Read by `build_atlas.py` when building the graph site, and by
 `init_obsidian.py` when colouring the Obsidian graph. Keeping both here is
 what makes the two views look like one product.
 

@@ -99,8 +99,8 @@ b{font-weight:600}
   border-radius:6px;font-size:12.5px;font-style:italic;color:var(--ink-3)}
 .wiki-md code{background:var(--paper-2);padding:1px 5px;border-radius:4px;font-size:12.5px}
 
-/* episode index */
-#episode-index{list-style:none;margin:0;padding:0}
+/* note index */
+#note-index{list-style:none;margin:0;padding:0}
 .ep-item{display:grid;grid-template-columns:34px 1fr;gap:4px 14px;padding:18px 0;
   border-bottom:1px solid var(--rule-soft);cursor:pointer;transition:.12s}
 .ep-item:hover{background:linear-gradient(90deg,rgba(184,66,26,.04),transparent)}

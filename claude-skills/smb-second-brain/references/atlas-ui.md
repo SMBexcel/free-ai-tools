@@ -45,19 +45,12 @@ negative spreads the graph out. `cooldownTicks` controls how long it settles.
 **Copy.** Title, subtitle, and disclaimer come from `SCHEMA.md` via
 `atlas.json`. Edit them there so Obsidian and the site agree.
 
-## Deploying
+## Local only
 
-Any static host. No build command, output directory is `site/`.
-
-- **Cloudflare Pages** — connect the repo, or `wrangler pages deploy site`
-- **Netlify** — drag the folder onto the dashboard
-- **GitHub Pages** — push `site/` and enable Pages
-
-One caveat that catches people: `atlas.json` embeds every note body, so a big
-vault makes a big file. Around 5 MB it is worth acting on — the Acquiring
-Minds vault is 163 notes and lands at ~5 MB. Options, cheapest first: add
-bulky folders to `private`, or use `--no-bodies` and link out to the source
-instead of rendering it.
+The viewer runs from `python3 -m http.server` on the user's machine. This
+skill does not deploy, upload, or host the folder, and does not recommend a
+host. `atlas.json` embeds every note body, so a big vault makes a big file;
+add bulky folders to `private`, or use `--no-bodies`.
 
 ## Markdown rendering
 

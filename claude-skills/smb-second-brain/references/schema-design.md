@@ -33,14 +33,14 @@ from frontmatter.
 
 ## Worked examples
 
-**Podcast / interview archive** (the Acquiring Minds Atlas)
+**Podcast / interview archive**
 ```
 episode  →  concept  →  theme
    ↓
 industry, buyer-profile          (hubs, from frontmatter)
 ```
-95 episodes, 35 concepts, 7 stage playbooks, 7 insight digests, 16 industries,
-3 buyer profiles → 163 nodes, ~2,000 links.
+A hundred episodes typically yields a few dozen concepts, a handful of
+themes, and a couple of thousand links. Two tiers, one hub layer.
 
 **Deal flow / acquisition search**
 ```

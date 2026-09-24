@@ -3,8 +3,8 @@
 **Version 1.0**
 
 Turn a folder of documents into an AI second brain: an LLM-maintained wiki of
-linked markdown notes you can ask questions, open in Obsidian, and publish as
-a 3D knowledge graph.
+linked markdown notes you can ask questions, open in Obsidian, and view as a
+3D knowledge graph on your own machine.
 
 No database. No embeddings. No code you have to write. The "database" is a
 folder of markdown files.
@@ -21,7 +21,7 @@ keeps it disciplined.
 | | |
 |---|---|
 | **[Claude Code](https://claude.com/claude-code)** | Required. This is a Claude Code skill — the LLM does the reading, filing, and linking. |
-| **Python 3.8+** | Required only to publish the graph site. Standard library only, nothing to `pip install`. Pre-installed on macOS and most Linux. On Windows, install from [python.org](https://python.org) and use `py -3` wherever this README says `python3`. |
+| **Python 3.8+** | Required only to build the graph site. Standard library only, nothing to `pip install`. Pre-installed on macOS and most Linux. On Windows, install from [python.org](https://python.org) and use `py -3` wherever this README says `python3`. |
 | **[Obsidian](https://obsidian.md)** | Optional but recommended. Free. The easiest way to see and edit your brain. |
 
 You do **not** need: a database, an embeddings provider, an API key beyond
@@ -80,8 +80,8 @@ lock-in: it is a folder, and it stays a folder.
 *Open folder as vault* and you get the graph view, backlinks, and full-text
 search immediately. This is where you work day to day.
 
-**The atlas site — shareable.** One script turns the same vault into a static
-site: editorial index on the left, 3D graph on the right, click a node to read
+**The atlas site — local.** One script turns the same vault into a static
+site you open on your own machine: editorial index on the left, 3D graph on the right, click a node to read
 the note.
 
 ```bash
@@ -91,9 +91,9 @@ python3 ~/.claude/skills/smb-second-brain/scripts/build_atlas.py \
 cd site && python3 -m http.server 4355        # then open http://localhost:4355
 ```
 
-`file://` will not work — the page fetches `atlas.json`, so it needs a server.
-Any static host works for deploying (Cloudflare Pages, Netlify, GitHub Pages):
-upload `site/`, no build command.
+`file://` will not work — the page fetches `atlas.json`, so it needs the local
+server above. The skill stops there: it builds and renders on your machine and
+never deploys, uploads, or hosts anything.
 
 Obsidian is the workshop. The atlas is the showroom. Same vault behind both.
 
@@ -105,7 +105,7 @@ Obsidian is the workshop. The atlas is the showroom. Same vault behind both.
 | **INGEST** | New docs arrive — file them and update their neighbours |
 | **QUERY** | Ask a question — answered with citations |
 | **LINT** | Every ~20 ingests — orphans, dead links, contradictions, drift |
-| **PUBLISH** | Build the graph site |
+| **RENDER** | Build the graph site and open it locally |
 
 Just say what you want ("add these 30 new transcripts", "lint the vault",
 "what did sellers say about customer concentration?") and Claude picks the
@@ -113,13 +113,14 @@ operation.
 
 ## Privacy
 
-`build_atlas.py` refuses to publish your raw sources by default. Folders named
+`build_atlas.py` keeps your raw sources out of `atlas.json` by default. Folders named
 `sources`, `transcripts`, `raw`, `source`, `archive`, and `pipeline` are
 withheld from `atlas.json`, and the build prints which ones it withheld.
 Override with `private` in `SCHEMA.md`. For a graph with no note text at all,
 use `--no-bodies`.
 
-Check before you deploy. `atlas.json` is a single file served to every visitor.
+`atlas.json` is one file with every note in it. If you ever share the `site/`
+folder, check it first.
 
 ## Layout
 
@@ -130,7 +131,7 @@ smb-second-brain/
 │  ├─ karpathy-model.md        the architecture, and when to add machinery
 │  ├─ schema-design.md         how to pick note types (the hard part)
 │  ├─ obsidian.md              compliance rules + setup
-│  └─ atlas-ui.md              customising and deploying the site
+│  └─ atlas-ui.md              customising the local viewer
 ├─ assets/
 │  ├─ SCHEMA.template.md       starting point for a new vault
 │  └─ site/                    the static viewer
@@ -150,10 +151,12 @@ Vendored in `assets/site/vendor/`, both MIT:
 Built by [SMB·excel](https://smbexcel.com).
 
 **AI summaries can be wrong.** Every note should link back to its real source,
-and any site you publish should keep the disclaimer visible.
+and the rendered site keeps the disclaimer visible.
 
 ## Changelog
 
+- **1.0** (2026-09-24) — Docs corrected: renders locally only, no hosting
+  instructions; worked examples generalised.
 - **1.0** — Initial release. Five operations (SETUP / INGEST / QUERY / LINT /
-  PUBLISH), Obsidian-native vault output, `build_atlas.py` + `init_obsidian.py`,
+  RENDER), Obsidian-native vault output, `build_atlas.py` + `init_obsidian.py`,
   dependency-free graph viewer.

@@ -10,7 +10,7 @@ it a library it maintains itself, and the memory problem stops mattering.
 
 **1. Raw sources.** The curated documents. Immutable. The LLM reads them and
 never edits them. Transcripts, contracts, PDFs, exports. Keep them in
-`sources/` and keep them out of anything you publish — they are usually the
+`sources/` and keep them out of anything you share — they are usually the
 part with names, numbers, and other people's confidential material in it.
 
 **2. The wiki.** LLM-generated interlinked markdown: summaries, entity pages,

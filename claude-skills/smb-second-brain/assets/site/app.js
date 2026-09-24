@@ -74,7 +74,7 @@ function buildIndex() {
     .sort((a, b) => b.val - a.val || a.label.localeCompare(b.label));
   $('results-count').textContent =
     `${list.length} of ${A.nodes.length} notes` + (query ? ` matching “${query}”` : '');
-  $('episode-index').innerHTML = list.slice(0, 300).map(n => `
+  $('note-index').innerHTML = list.slice(0, 300).map(n => `
     <li class="ep" data-id="${n.id}">
       <span class="ep-dot" style="background:${COLORS[n.type] || '#999'}"></span>
       <div>
@@ -82,7 +82,7 @@ function buildIndex() {
         ${n.one_liner ? `<p class="ep-sub">${esc(n.one_liner)}</p>` : ''}
       </div>
     </li>`).join('');
-  $('episode-index').querySelectorAll('.ep').forEach(li =>
+  $('note-index').querySelectorAll('.ep').forEach(li =>
     li.addEventListener('click', () => openNote(li.dataset.id)));
 }
 

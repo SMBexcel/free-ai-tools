@@ -1,6 +1,6 @@
 ---
 name: smb-second-brain
-description: Turn a pile of unstructured documents into an AI second brain — an LLM-maintained wiki of linked markdown notes you can ask questions and explore as a 3D knowledge graph. Use this skill when the user has a folder of transcripts, contracts, notes, PDFs, CIMs, research, or meeting recordings and wants to make it queryable; when they say "build me a second brain", "make my docs searchable", "turn this folder into a wiki", "set up an LLM wiki", "Karpathy wiki", "knowledge graph from my documents"; or when they want to publish an existing vault as a browsable graph site. Covers all five operations — SETUP (design the schema), INGEST (file new docs), QUERY (ask with citations), LINT (health-check the wiki), and PUBLISH (build the graph site). No database, no embeddings, no code required from the user.
+description: Turn a pile of unstructured documents into an AI second brain — an LLM-maintained wiki of linked markdown notes you can ask questions and explore as a 3D knowledge graph. Use this skill when the user has a folder of transcripts, contracts, notes, PDFs, CIMs, research, or meeting recordings and wants to make it queryable; when they say "build me a second brain", "make my docs searchable", "turn this folder into a wiki", "set up an LLM wiki", "Karpathy wiki", "knowledge graph from my documents"; or when they want to see an existing vault as a browsable graph, locally. Covers all five operations — SETUP (design the schema), INGEST (file new docs), QUERY (ask with citations), LINT (health-check the wiki), and RENDER (build the graph site and view it locally). No database, no embeddings, no code required from the user.
 ---
 
 # Second Brain — build an LLM wiki from a pile of docs
@@ -22,7 +22,7 @@ implementing the actual architecture rather than "making some notes".
 | **INGEST** | New docs arrive | Write/update notes, cross-link into the existing graph |
 | **QUERY** | User asks a question | Index → entry node → traverse → answer with citations |
 | **LINT** | Every ~20 ingests | Contradictions, orphans, stale claims, missing cross-refs |
-| **PUBLISH** | They want to show it | Build `atlas.json`, serve the graph site |
+| **RENDER** | They want to see it | Build `atlas.json`, open the graph site locally |
 
 Announce which operation you are running. Never silently switch.
 
@@ -72,7 +72,7 @@ my-brain/
 └─ <type>/            one folder per note type
 ```
 
-Then make it open in Obsidian — do this at SETUP, not at PUBLISH, so the user
+Then make it open in Obsidian — do this at SETUP, not at RENDER, so the user
 can watch their graph fill in as you ingest:
 
 ```bash
@@ -145,7 +145,7 @@ things:
 
 Obsidian is the workshop, the atlas site is the showroom. Ship both.
 
-## PUBLISH — build the graph site
+## RENDER — build the graph site, locally
 
 There are two ways to see the brain, and the user should have both.
 
@@ -154,7 +154,7 @@ vault. Open folder as vault → the graph view is right there, colour-coded per
 type by `init_obsidian.py`, with backlinks and full-text search. This is the
 answer for a user who does not want to run anything.
 
-**Option 2 — the atlas site (shareable).**
+**Option 2 — the atlas site (local).**
 `scripts/build_atlas.py` reads the vault and emits one `atlas.json`.
 `assets/site/` is a static viewer for it: editorial index on the left, 3D
 force-directed graph on the right, click a node to read the note, wikilinks
@@ -175,11 +175,13 @@ cd site && python3 -m http.server 4355     # http://localhost:4355
 
 On Windows, `python3` is usually `py -3`. If neither resolves, the user needs
 Python from python.org — say so rather than letting the command fail twice.
-Python is only needed to publish; SETUP, INGEST, QUERY and LINT need none.
+Python is only needed to render; SETUP, INGEST, QUERY and LINT need none.
 
-`file://` will not work — the viewer fetches `atlas.json`, so it needs a
-server. Any static host will do (Cloudflare Pages, Netlify, GitHub Pages):
-upload the `site/` folder, no build command.
+`file://` will not work — the viewer fetches `atlas.json`, so it needs the
+local server above. **This skill renders locally only.** Do not deploy,
+upload, or host the `site/` folder anywhere; do not suggest a host. If the
+user wants it online, that is their call and their own step — say so and
+stop there.
 
 The builder is config-free by default and infers everything from the vault.
 `SCHEMA.md`'s ```json atlas``` block tunes it:
@@ -194,7 +196,7 @@ The builder is config-free by default and infers everything from the vault.
 
 `private` defaults to `transcripts, raw, sources, source, archive, pipeline`
 — raw sources stay out of `atlas.json` unless the user opts in. Say so when
-you publish. Use `--no-bodies` for a graph with no note text at all.
+you render. Use `--no-bodies` for a graph with no note text at all.
 
 Read `references/atlas-ui.md` to customise the viewer.
 
@@ -204,11 +206,12 @@ Read `references/atlas-ui.md` to customise the viewer.
 
 - **Schema before volume.** Always.
 - **Never edit `sources/`.** Raw layer is immutable.
+- **Render locally, never deploy.** No hosting, no upload, no deploy commands.
 - **A note with no links is a bug.**
 - **Cite everything.** Every claim traces to a note; every note traces to a source.
 - **Let the failure justify the complexity.** No embeddings, no graph
   database, no chunking until the plain wiki visibly misses answers the user
   knows are in there. That is usually never. If it does happen, the upgrade
   path is in `references/karpathy-model.md`.
-- **AI summaries can be wrong.** Keep the disclaimer on any published site,
+- **AI summaries can be wrong.** Keep the disclaimer on the rendered site,
   and keep a link back to the real source on every note.

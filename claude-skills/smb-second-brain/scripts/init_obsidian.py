@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
 init_obsidian.py — make a vault open cleanly in Obsidian, colour-matched to
-the published atlas.
+the atlas site.
 
     python3 init_obsidian.py --vault ./my-brain
 
 Writes .obsidian/ (app, appearance, core-plugins, graph) with one graph
 colour group per note type, using the same palette as build_atlas.py — so the
-Obsidian graph and the published site look like the same product.
+Obsidian graph and the atlas site look like the same product.
 
 Safe to re-run: only .obsidian/graph.json colour groups are rewritten;
 existing files are left alone unless --force.

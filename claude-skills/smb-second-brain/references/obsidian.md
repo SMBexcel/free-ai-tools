@@ -13,8 +13,8 @@ per-vault settings and nothing else — delete it and you still have your notes.
 
 **1. Wikilinks, not markdown links, between notes.**
 ```
-[[episodes/adam-vandermyde-petro-west|8-Figure Exit After 5 Years]]   ✓
-[Adam](./episodes/adam-vandermyde-petro-west.md)                      ✗
+[[episodes/2024-03-14-jane-doe|Jane Doe on seller financing]]   ✓
+[Jane](./episodes/2024-03-14-jane-doe.md)                       ✗
 ```
 Both render, but only wikilinks populate the graph view and backlinks pane.
 Use standard markdown links for external URLs.
@@ -29,8 +29,8 @@ show a parse error to the user if it is malformed.
 ```yaml
 ---
 type: episode
-title: "8-Figure Exit After 5 Years"
-tags: [acquiring-minds, episode]
+title: "Jane Doe on seller financing"
+tags: [podcast, episode]
 industry: construction-trades
 ---
 ```
@@ -57,7 +57,7 @@ python3 scripts/init_obsidian.py --vault ./my-brain
 Writes `.obsidian/` with core plugins on (graph, backlinks, outgoing links,
 tag pane, properties, outline) and one graph colour group per note type,
 using the same palette as `build_atlas.py`. The Obsidian graph and the
-published site then look like the same product.
+atlas site then look like the same product.
 
 Re-running is safe: only `graph.json` is rewritten, so a user's own settings
 survive. Pass `--force` to overwrite everything.
@@ -71,17 +71,17 @@ Ship both. They are different jobs.
 | | Obsidian | Atlas site |
 |---|---|---|
 | Setup | Install an app, open a folder | Run a script, serve a folder |
-| Audience | The owner | Anyone with the link |
+| Audience | The owner | The owner, on their machine |
 | Editing | Yes | No — read only |
 | Graph | 2D, built in, filterable | 3D, styled, embeddable |
 | Search | Full-text over everything | Index + type filters |
 | Backlinks | Automatic panel | "Linked notes" list |
 | Offline | Yes | Yes |
-| Cost | Free | Free static hosting |
+| Cost | Free | Free, runs locally |
 
 Rule of thumb: **Obsidian is the workshop, the atlas is the showroom.** The
-user works in Obsidian daily; they publish the atlas when they want to hand
-the brain to someone else.
+user works in Obsidian daily; they render the atlas when they want to see
+the whole map at once.
 
 ## Gotchas
 
@@ -93,5 +93,3 @@ the brain to someone else.
 - **Orphans** are hidden in the graph unless `showOrphans` is on. This skill
   leaves it on so the user sees their own filing gaps.
 - **Nested tags** (`#deal/closed`) work and are worth using for hierarchy.
-- **Obsidian Publish** is a paid hosted option if the user wants a shareable
-  wiki without running the atlas build. It renders pages, not a 3D graph.
