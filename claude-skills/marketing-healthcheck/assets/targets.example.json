@@ -1,0 +1,79 @@
+{
+  "_readme": "Input shape for healthcheck.py and scorecard.py. Only name and domain are required; everything else sharpens the result. Every value below is a placeholder: the domains, coordinates, place IDs and paths are not real. The two subjects are deliberately from unrelated categories, so that nothing in this file reads as a template for one kind of business. Copy this file, replace the contents, and pass it with --targets.",
+  "_field_notes": {
+    "name": "How the subject appears in the report. Must be unique across subjects.",
+    "domain": "Bare hostname. A scheme or path is stripped, so https://example.com/x becomes example.com.",
+    "category": "How a customer would describe what the business does, in plain words. Used for the paid search checks, never for scoring.",
+    "keywords": "The terms a customer would actually type, not the words the business uses about itself. Needed for the paid checks F1, F2 and F3; leave empty for a free-tier run. If you do not know them, ask. Guessing them is one of the two common ways these audits go wrong.",
+    "locations": "One entry per physical location with its own address. lat/lng must be the location's own coordinates, not the city centre; testing from the wrong point is the single most common way a local audit becomes unfair. place_id is optional but stops a same-name profile in a nearby town being matched instead.",
+    "coordinates": "The lat/lng values in this file are round placeholders, not real places. Substitute each location's own coordinates, read from the location record and verified against the address the business actually operates from.",
+    "expects": "Contracted or promised volumes, for comparing delivery against the invoice. Compared in S1; never used as a proxy for results.",
+    "publishes": "Optional true/false. Forces or disables the S1/S2/S3 content checks. Omit to let the scorer infer it from what it finds.",
+    "advertises": "Optional true/false. Without it M3 scores null, because a tag inventory alone cannot tell 'no spend' from 'spend with no tag'.",
+    "compare_sets": "Optional. Explicit comparable page sets for the uniqueness check, which beats the automatic path-prefix grouping whenever you know the pages.",
+    "post_urls": "Optional. Explicit article URLs for the authorship and batch-publish analysis.",
+    "sample_urls": "Optional. URLs forced into the page sample, for example a money page the sitemap does not surface."
+  },
+  "subjects": [
+    {
+      "name": "Example Advisory",
+      "domain": "example.com",
+      "category": "bookkeeping and payroll for small businesses",
+      "keywords": [
+        "bookkeeping services",
+        "outsourced payroll",
+        "small business accountant"
+      ],
+      "locations": [
+        {
+          "label": "Office A",
+          "lat": 10.0,
+          "lng": 20.0,
+          "place_id": "EXAMPLE_PLACE_ID_OFFICE_A"
+        },
+        {
+          "label": "Office B",
+          "lat": 30.0,
+          "lng": 40.0,
+          "place_id": "EXAMPLE_PLACE_ID_OFFICE_B"
+        }
+      ],
+      "expects": {
+        "posts_per_month": 4,
+        "location_pages": 2,
+        "notes": "Retainer covers four posts a month and one landing page per location."
+      },
+      "publishes": true,
+      "advertises": true,
+      "compare_sets": {
+        "locations": [
+          "https://example.com/locations/office-a",
+          "https://example.com/locations/office-b"
+        ],
+        "services": [
+          "https://example.com/services/service-one",
+          "https://example.com/services/service-two",
+          "https://example.com/services/service-three"
+        ]
+      },
+      "post_urls": [
+        "https://example.com/blog/post-one",
+        "https://example.com/blog/post-two",
+        "https://example.com/blog/post-three"
+      ],
+      "sample_urls": [
+        "https://example.com/contact"
+      ]
+    },
+    {
+      "name": "Example Retail",
+      "domain": "retail.example.net",
+      "category": "online store selling desk and office furniture",
+      "keywords": [
+        "buy a standing desk online",
+        "office chairs delivered"
+      ],
+      "advertises": false
+    }
+  ]
+}

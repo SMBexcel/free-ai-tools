@@ -1,0 +1,386 @@
+{
+  "_readme": "Industry-agnostic digital marketing health check. 20 checks, five groups. Scores: 2 strong, 1 partial, 0 weak, na not applicable, null not run. Never score a check that was not run. applies_when is the default scope; where a check also carries a substantive rubric 'na' condition, the rubric na is the operative gate and must be decided during scoping, before results are seen. Values: always | local | advertises | publishes.",
+  "version": "1.0",
+  "checks": [
+    {
+      "id": "F1",
+      "group": "Found",
+      "title": "Local pack presence",
+      "question": "Where does the business rank in the map pack across a grid around each of its own locations, for the terms a customer would type?",
+      "applies_when": "local",
+      "cost": "paid",
+      "tool": "geo-grid rank tracker (per-point pricing)",
+      "command": "run the grid actor with centerLat/centerLng/placeId from THIS location, not the city centre",
+      "method": "For each location, run a 5x5 or 7x7 grid centred on the location's own coordinates, with its place ID, for each money keyword. Record rank per point. Score the location, then roll up to the business.",
+      "rubric": {
+        "2": "In the top 3 at more than half the grid points, and never absent, across most keywords",
+        "1": "In the top 3 at some points, or consistently ranked 4-10",
+        "0": "Outside the top 3 at most points, or absent",
+        "na": "No physical location serving walk-in or local-intent demand",
+        "null": "Grid not run"
+      },
+      "caveat": "Rank is not revenue. A small-market top-3 can be worth less than a large-market rank 5. Also verify the listing matched is actually theirs; same-name profiles in nearby towns are a common false negative."
+    },
+    {
+      "id": "F2",
+      "group": "Found",
+      "title": "Organic visibility for category terms",
+      "question": "Does a relevant page rank in the organic top 10 for the category terms a buyer would search, and is it the right page?",
+      "applies_when": "always",
+      "cost": "paid",
+      "tool": "search results scraper",
+      "command": "query 'category + qualifier' per market; record position and landing URL",
+      "method": "Build the query list from how customers describe the need, not how the business describes itself. Check both position and whether the ranking URL is the page built for that intent.",
+      "rubric": {
+        "2": "Top 10 for most terms with the intended page ranking",
+        "1": "Top 10 for some terms, or ranking with the wrong page (home page for a service query)",
+        "0": "Outside the top 10 for most terms",
+        "na": "Demand is not search-led",
+        "null": "Not run"
+      },
+      "caveat": "Run without personalisation and note the locale used. Results differ by device and geography."
+    },
+    {
+      "id": "F3",
+      "group": "Found",
+      "title": "Branded versus non-branded dependency",
+      "question": "Is the business found because people already know its name, or because it wins category demand?",
+      "applies_when": "always",
+      "cost": "paid",
+      "tool": "search results scraper, plus any public keyword source",
+      "command": "compare visibility for the business name against visibility for category terms",
+      "method": "A business that ranks first for its own name and nowhere for its category is harvesting demand it already had. That is a real asset, but it is not marketing performance, and it collapses when the founder or the brand-building stops.",
+      "rubric": {
+        "2": "Wins meaningful non-branded category visibility as well as branded",
+        "1": "Mostly branded with a few category terms",
+        "0": "Branded only",
+        "na": "Pure referral or contract business with no search demand",
+        "null": "Not run"
+      },
+      "caveat": "Strong brands make the phone ring while invisible for category search. Say which one you measured."
+    },
+    {
+      "id": "F4",
+      "group": "Found",
+      "title": "Answer-engine readiness",
+      "question": "Can AI assistants read, understand and cite this business?",
+      "applies_when": "always",
+      "cost": "free",
+      "tool": "HTTP fetch",
+      "command": "fetch /llms.txt, /robots.txt, and parse schema.org JSON-LD on key pages",
+      "method": "Check for: an llms.txt; robots.txt not blocking AI crawlers; valid Organization/LocalBusiness schema with address, hours, services; FAQ or HowTo schema where relevant; content readable without JavaScript execution; clear semantic headings.",
+      "rubric": {
+        "2": "Schema complete and valid, AI crawlers permitted, content server-rendered, llms.txt present",
+        "1": "Some schema, or crawlers permitted but structure thin",
+        "0": "No usable structured data, or AI crawlers blocked, or content only renders client-side",
+        "na": "Never",
+        "null": "Not run"
+      },
+      "caveat": "This is a readiness proxy, not proof of citation. It is the cheapest check here and the one most businesses fail outright."
+    },
+    {
+      "id": "F5",
+      "group": "Found",
+      "title": "Indexation health",
+      "question": "Is what the business publishes actually eligible to be found?",
+      "applies_when": "always",
+      "cost": "free",
+      "tool": "HTTP fetch",
+      "command": "fetch sitemap.xml and robots.txt; sample URLs for status, canonical and noindex",
+      "method": "Compare sitemap URL count against what is reachable and indexable. Look for noindex on money pages, canonical tags pointing elsewhere, redirect chains, and orphaned location pages.",
+      "rubric": {
+        "2": "Sitemap current and accurate, money pages indexable, no blocking directives",
+        "1": "Minor issues: stale sitemap entries, a few redirect chains",
+        "0": "Money pages noindexed or canonicalised away, or no sitemap and poor internal linking",
+        "na": "Never",
+        "null": "Not run"
+      },
+      "caveat": "Absence of a sitemap is not fatal on its own for a small site."
+    },
+    {
+      "id": "T1",
+      "group": "Trusted",
+      "title": "Review volume and rating versus competitors",
+      "question": "How does the business compare on reviews to the competitors a customer sees beside it?",
+      "applies_when": "local",
+      "cost": "paid",
+      "tool": "maps or places scraper",
+      "command": "pull the top competitors in the same category and radius, with review counts and ratings",
+      "method": "Absolute counts mean nothing without the comparison set. Compare against the businesses that actually appear in the same pack.",
+      "rubric": {
+        "2": "Review count and rating at or above the local median, and growing",
+        "1": "Comparable rating but materially fewer reviews, or flat growth",
+        "0": "Well below the set on count or rating",
+        "na": "Category where reviews are not a buying signal",
+        "null": "Not run"
+      },
+      "caveat": "Review counts accumulate over years; a newer business is not necessarily underperforming. Compare recent velocity as well as totals."
+    },
+    {
+      "id": "T2",
+      "group": "Trusted",
+      "title": "Review response rate and latency",
+      "question": "Are reviews answered, and how fast?",
+      "applies_when": "local",
+      "cost": "paid",
+      "tool": "reviews scraper",
+      "command": "pull reviews with owner replies and timestamps; compute response rate and median latency",
+      "method": "Rate = share of reviews with an owner reply. Latency = median time from review to reply. Check negative reviews separately; those are the ones that matter.",
+      "rubric": {
+        "2": "Most reviews answered, median latency inside the stated or implied SLA, negatives answered fastest",
+        "1": "Answered but slow, or negatives answered no faster than positives",
+        "0": "Most reviews unanswered",
+        "na": "No public review surface",
+        "null": "Not run"
+      },
+      "caveat": "Edited reviews carry the edit date, which produces negative latencies. Drop non-positive latencies rather than letting them skew the median."
+    },
+    {
+      "id": "T3",
+      "group": "Trusted",
+      "title": "Profile completeness and posting cadence",
+      "question": "Is the business profile fully populated and actively maintained?",
+      "applies_when": "local",
+      "cost": "paid",
+      "tool": "places scraper with detail page enabled",
+      "command": "pull categories, hours, attributes, services, photos, posts and Q&A per location",
+      "method": "Check every location, not just the flagship. Empty satellite profiles are common and invisible from head office.",
+      "rubric": {
+        "2": "All locations complete, posting regularly, questions answered",
+        "1": "Flagship complete, satellites thin, or posting sporadic",
+        "0": "Incomplete profiles, no posts, unanswered questions, or missing listings",
+        "na": "No location-based profiles",
+        "null": "Not run"
+      },
+      "caveat": "Posting cadence is activity, not results. Score it as hygiene, never as performance."
+    },
+    {
+      "id": "S1",
+      "group": "Saying",
+      "title": "Publishing cadence",
+      "question": "How much is actually published, and how regularly?",
+      "applies_when": "publishes",
+      "cost": "free",
+      "tool": "HTTP fetch",
+      "command": "parse sitemap lastmod dates; bucket by month over the last 12 months",
+      "method": "Count published items per month from the sitemap rather than trusting a report. If a contracted volume is known, compare it.",
+      "rubric": {
+        "2": "Consistent cadence over 12 months, meeting any contracted volume",
+        "1": "Irregular, or bursts followed by gaps",
+        "0": "Little or nothing published in the last 6 months",
+        "na": "No content programme",
+        "null": "Not run"
+      },
+      "caveat": "Cadence is the definition of activity, not quality. It exists to be compared against results, never quoted alone."
+    },
+    {
+      "id": "S2",
+      "group": "Saying",
+      "title": "Page uniqueness",
+      "question": "Are location and service pages genuinely written, or one template with the place name swapped?",
+      "applies_when": "publishes",
+      "cost": "free",
+      "tool": "HTTP fetch plus text similarity",
+      "command": "fetch comparable pages, strip boilerplate, compute pairwise similarity",
+      "method": "Compare location pages to each other and service pages to each other. High similarity across a set is city-swapping. Report the similarity figure so the claim is checkable.",
+      "rubric": {
+        "2": "Low similarity across the set; pages carry location or service specifics",
+        "1": "Moderate similarity; shared skeleton with some genuine content",
+        "0": "Near-identical pages differing only by name",
+        "na": "Single page or no comparable set",
+        "null": "Not run"
+      },
+      "caveat": "A shared template is not automatically bad. Judge the body copy, not the navigation and footer, and say what you stripped."
+    },
+    {
+      "id": "S3",
+      "group": "Saying",
+      "title": "Authorship and batch-publish signals",
+      "question": "Does the content look written by someone, or generated and dumped?",
+      "applies_when": "publishes",
+      "cost": "free",
+      "tool": "HTTP fetch",
+      "command": "parse article schema and page metadata for author, datePublished and modification times",
+      "method": "Look for: many items sharing one publish timestamp; generic authors such as 'admin'; no bylines; no author pages; identical structure across every post.",
+      "rubric": {
+        "2": "Named authors, staggered publish times, varied structure",
+        "1": "Bylines missing or generic, but content otherwise varied",
+        "0": "Batch timestamps, generic author, uniform structure across the set",
+        "na": "No article content",
+        "null": "Not run"
+      },
+      "caveat": "Batch publishing proves how it was uploaded, not who wrote it or whether it is any good. State it as a signal, not a verdict."
+    },
+    {
+      "id": "W1",
+      "group": "Working",
+      "title": "Speed and Core Web Vitals",
+      "question": "Does the site load fast enough to keep the traffic it earns?",
+      "applies_when": "always",
+      "cost": "free but not bundled",
+      "tool": "PageSpeed Insights API, run separately from the bundled collectors",
+      "command": "request mobile and desktop for the home page and one money page, then put the metric values in manual_results.json under W1",
+      "method": "Prefer field data where available; fall back to lab. Test a conversion page, not only the home page.",
+      "rubric": {
+        "2": "Core Web Vitals passing on mobile",
+        "1": "Mixed, or passing on desktop only",
+        "0": "Failing on mobile",
+        "na": "Never",
+        "null": "Not run"
+      },
+      "caveat": "No bundled script calls PageSpeed Insights, so this check scores null on a bundled run and only carries a number once someone runs it and supplies the result. Lab scores vary run to run. Quote the metric values, not the headline score."
+    },
+    {
+      "id": "W2",
+      "group": "Working",
+      "title": "Mobile experience",
+      "question": "Does the site work on a phone, where most of the traffic is?",
+      "applies_when": "always",
+      "cost": "free",
+      "tool": "HTTP fetch with mobile user agent, optional rendering",
+      "command": "check viewport meta, tap target sizing, and that a phone number is tappable",
+      "method": "Check the basics that break conversion: a tappable phone number, a form that fits, no interstitial covering the content.",
+      "rubric": {
+        "2": "Renders correctly, primary action reachable in one tap",
+        "1": "Usable with friction",
+        "0": "Broken layout, untappable contact, or blocking interstitial",
+        "na": "Never",
+        "null": "Not run"
+      },
+      "caveat": "Automated checks miss visual breakage. Confirm with a rendered screenshot before making the claim."
+    },
+    {
+      "id": "W3",
+      "group": "Working",
+      "title": "HTTPS and security headers",
+      "question": "Is the site served securely and kept current?",
+      "applies_when": "always",
+      "cost": "free",
+      "tool": "HTTP fetch",
+      "command": "inspect certificate, redirect chain and response headers; fingerprint CMS and plugin versions",
+      "method": "Check HTTPS enforced, certificate valid and not near expiry, HSTS present, and whether the CMS or its plugins advertise stale versions.",
+      "rubric": {
+        "2": "HTTPS enforced, current software, no version disclosure",
+        "1": "HTTPS fine, software behind or versions disclosed",
+        "0": "Mixed content, invalid or expiring certificate, or materially outdated software",
+        "na": "Never",
+        "null": "Not run"
+      },
+      "caveat": "Version fingerprints can be spoofed or stripped by a proxy. Treat as indicative."
+    },
+    {
+      "id": "W4",
+      "group": "Working",
+      "title": "Email authentication",
+      "question": "Is the domain protected so marketing email lands and the brand cannot be spoofed?",
+      "applies_when": "always",
+      "cost": "free",
+      "tool": "DNS",
+      "command": "query TXT for SPF and DMARC; probe common DKIM selectors",
+      "method": "Check SPF exists and is not overly permissive, DKIM is signing, and DMARC exists with an enforcing policy rather than p=none.",
+      "rubric": {
+        "2": "SPF and DKIM valid, DMARC at quarantine or reject",
+        "1": "SPF and DKIM present, DMARC absent or p=none",
+        "0": "No SPF or no DMARC at all",
+        "na": "Never",
+        "null": "Not run"
+      },
+      "caveat": "The most reliably failed check in this set, and the easiest to fix. A domain that sends marketing email without it is carrying deliverability risk that nothing else in the programme can offset."
+    },
+    {
+      "id": "M1",
+      "group": "Measured",
+      "title": "Analytics installed and configured",
+      "question": "Is anyone measuring anything?",
+      "applies_when": "always",
+      "cost": "free",
+      "tool": "HTTP fetch and tag detection",
+      "command": "detect analytics and tag manager containers across a sample of pages",
+      "method": "Check presence, and that it is on every page rather than the home page only. Note multiple or duplicate containers.",
+      "rubric": {
+        "2": "One analytics implementation, consistent across pages",
+        "1": "Present but inconsistent, or duplicated",
+        "0": "Absent, or only on some pages",
+        "na": "Never",
+        "null": "Not run"
+      },
+      "caveat": "Presence of a tag does not mean goals or events are configured. You cannot see configuration from outside; say so."
+    },
+    {
+      "id": "M2",
+      "group": "Measured",
+      "title": "Conversion tracking",
+      "question": "Can the business tell which marketing produced a customer?",
+      "applies_when": "always",
+      "cost": "free",
+      "tool": "HTTP fetch and tag detection",
+      "command": "look for call tracking numbers, dynamic number insertion, form handlers and event wiring",
+      "method": "Check whether phone numbers are tracked, whether the displayed number differs by source, and whether forms post somewhere that records attribution.",
+      "rubric": {
+        "2": "Calls and forms both tracked and attributable to source",
+        "1": "One of the two tracked",
+        "0": "Neither; the business is buying traffic it cannot attribute",
+        "na": "No inbound conversion surface",
+        "null": "Not run"
+      },
+      "caveat": "A header number differing from the tap-to-call link is a broken implementation, not a sophisticated one. Check both."
+    },
+    {
+      "id": "M3",
+      "group": "Measured",
+      "title": "Ad tags versus actual advertising",
+      "question": "Do the tags on the site match the advertising the business is actually running?",
+      "applies_when": "advertises",
+      "cost": "free plus optional paid",
+      "tool": "tag detection; public ad transparency libraries",
+      "command": "detect ad platform tags, then check the platforms' public ad libraries for live ads",
+      "method": "Two failure modes, both common. Paying for a channel with no tag on the site means spend nobody can measure. A tag with no ads running means a campaign stopped and nobody noticed.",
+      "rubric": {
+        "2": "Tags present and firing for every channel with live ads",
+        "1": "Partial coverage",
+        "0": "Advertising with no conversion tag, or tags for channels long dormant",
+        "na": "No paid media",
+        "null": "Not run"
+      },
+      "caveat": "Ad libraries have uneven coverage by platform and country. Absence of a listed ad is weak evidence of no spend."
+    },
+    {
+      "id": "O1",
+      "group": "Owned",
+      "title": "Domain, DNS and hosting control",
+      "question": "What does DNS show about who runs this domain's infrastructure and who is authorised to send as it?",
+      "applies_when": "always",
+      "cost": "free",
+      "tool": "DNS",
+      "command": "resolve NS and MX, read the SPF record, and expand everything its include: and redirect= mechanisms resolve to",
+      "method": "DNS answers three questions and no others: which operator runs the nameservers, which operator runs mail, and how many third parties SPF authorises to send as the domain. Record the operator names and the sender list. Then ask the business which of those it recognises, because nothing in DNS distinguishes an operator the business runs from one a vendor runs on its behalf.",
+      "rubric": {
+        "2": "Nameservers and mail on operators the business names as its own, and every third party in the SPF record accounted for",
+        "1": "Nameservers or mail run by a third party that is identifiable, or a short sender list the business can mostly account for",
+        "0": "SPF is permissive, so senders are effectively unrestricted, or it authorises third parties nobody can account for",
+        "na": "Never",
+        "null": "Not run"
+      },
+      "caveat": "DNS names the operator, not the owner. A business-run nameserver and a vendor-run one look identical in a lookup, so a 2 needs the business to confirm the list rather than the lookup to prove it; from DNS alone this check caps at 1. Registrant, registrar and expiry date are a separate manual sub-check: run a WHOIS lookup before claiming a domain is held by a vendor or close to expiry, because none of that is collected here. A privacy service hiding the registrant is legitimate and is not a finding. A stale SPF include outlives the contract that created it, routinely by years."
+    },
+    {
+      "id": "O2",
+      "group": "Owned",
+      "title": "Third-party and competing vendor tags",
+      "question": "Who else is already inside this website?",
+      "applies_when": "always",
+      "cost": "free",
+      "tool": "tag detection",
+      "command": "enumerate every third-party script, pixel and container, and every authorised email sender",
+      "method": "Inventory what is firing. Look for two agencies' tags, abandoned vendor scripts still loading, and email platforms competing with the one the business says it uses.",
+      "rubric": {
+        "2": "Clean, coherent stack matching what the business says it uses",
+        "1": "Some legacy tags still loading",
+        "0": "Competing vendors live at once, or a stack that contradicts the stated arrangement",
+        "na": "Never",
+        "null": "Not run"
+      },
+      "caveat": "For a buyer this is a diligence question as much as a marketing one. It shows who has access and what a transition would involve."
+    }
+  ]
+}
