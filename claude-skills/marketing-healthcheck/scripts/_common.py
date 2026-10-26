@@ -33,7 +33,7 @@ import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta
 
-VERSION = "1.0"
+VERSION = "1.1"
 
 # A descriptive User-Agent is the minimum courtesy owed to a site you are
 # measuring without asking. Set HEALTHCHECK_CONTACT to an email or URL so the

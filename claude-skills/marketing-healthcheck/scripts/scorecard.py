@@ -51,8 +51,8 @@ from collections import OrderedDict
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from _common import VERSION, absolute_url, normalise_domain, read_json, safe_slug, \
-    strip_www, truncate, utc_now_iso, write_json  # noqa: E402
+from _common import VERSION, absolute_url, normalise_domain, parse_date_loose, read_json, \
+    safe_slug, strip_www, truncate, utc_now_iso, write_json  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SKILL_ROOT = os.path.dirname(HERE)
@@ -132,12 +132,12 @@ FIX_TEXT = {
     "O1": "confirm who controls the domain and DNS, and review who SPF authorises to send",
     "S3": "give posts real named authors and stop bulk-uploading them on one timestamp",
     "M3": "reconcile the ad tags on the site against the channels actually running",
-    "F1": "run a geo-grid at each location's own coordinates before drawing any conclusion",
-    "F2": "check organic visibility for the terms customers type, not the ones you use",
-    "F3": "measure non-branded category visibility separately from branded",
-    "T1": "compare review count and rating against the businesses in the same pack",
+    "F1": "close the map-pack gaps the grid shows: primary category, reviews and a location page for each term customers type",
+    "F2": "build or fix the one page that should rank for each category term, and link to it from the rest of the site",
+    "F3": "win category searches, not just the name: today only people who already know the business find it",
+    "T1": "close the review gap with the competitors beside it: ask every happy customer, every week",
     "T2": "answer reviews, negatives fastest",
-    "T3": "complete every location profile, not just the flagship",
+    "T3": "complete every location profile and post to it regularly, not just the flagship",
 }
 
 
@@ -1031,12 +1031,363 @@ def score_o2(subject, data):
     return result(2, evidence, command, "fetch_signals.py")
 
 
+# ---------------------------------------------------------------------------
+# paid checks, scored from apify__<domain>.json (scripts/apify_collect.py)
+# ---------------------------------------------------------------------------
+
+APIFY_CMD = ("python3 scripts/apify_collect.py --targets <targets.json> --budget-usd <cap> --yes "
+             "(or --import-dir for the Apify MCP route)")
+PAID_SCORED_CHECKS = ("F1", "F2", "F3", "T1", "T2", "T3")
+REVIEW_REPLY_SLA_DAYS = 7      # implied SLA for T2 when none is stated
+RECENT_REVIEW_DAYS = 90        # "growing" for T1 means a review inside this window
+
+
+def _apify_source(data, kind):
+    actor = ((data.get("apify") or {}).get("actors") or {}).get(kind) or kind
+    return "apify: " + actor
+
+
+def _median(values):
+    values = sorted(v for v in values if v is not None)
+    if not values:
+        return None
+    middle = len(values) // 2
+    if len(values) % 2:
+        return values[middle]
+    return (values[middle - 1] + values[middle]) / 2.0
+
+
+def _rollup(scores):
+    """Location scores to one business score: strong only if most are strong and
+    none are weak; weak if most are weak; otherwise partial."""
+    values = [score for score in scores if score in (0, 1, 2)]
+    if not values:
+        return None
+    if sum(1 for v in values if v == 2) * 2 > len(values) and 0 not in values:
+        return 2
+    if sum(1 for v in values if v == 0) * 2 > len(values):
+        return 0
+    return 1
+
+
+def _same_site(url, domain):
+    try:
+        host = strip_www((urllib.parse.urlparse(url or "").hostname or "").lower())
+    except ValueError:
+        return False
+    base = strip_www((domain or "").lower())
+    return bool(host) and (host == base or host.endswith("." + base))
+
+
+def _is_home_url(url):
+    path = urllib.parse.urlparse(url or "").path or "/"
+    parts = [part for part in path.split("/") if part]
+    return all(len(part) <= 3 for part in parts)
+
+
+def _own_listing(loc, items, subject):
+    own = loc.get("resolved") or {}
+    keys = [own.get("placeId"), own.get("fid"), loc.get("place_id")]
+    for item in items:
+        if any(key and key in (item.get("placeId"), item.get("fid"), item.get("cid"))
+               for key in keys):
+            return item
+    for item in items:
+        if _same_site(item.get("website"), subject["domain"]):
+            return item
+    return None
+
+
+def _serp_positions(data, subject):
+    """Best organic position of the subject's own site per query term."""
+    serp = (data.get("apify") or {}).get("serp") or {}
+    found = {}
+    for item in serp.get("items") or []:
+        term = ((item.get("searchQuery") or {}).get("term") or "").strip().lower()
+        best = None
+        for row in sorted(item.get("organicResults") or [],
+                          key=lambda r: r.get("position") or 999):
+            if _same_site(row.get("url"), subject["domain"]):
+                best = row
+                break
+        found[term] = best
+    return found
+
+
+def _category_visibility(data, subject):
+    keywords = (data.get("apify") or {}).get("keywords") or subject.get("keywords") or []
+    positions = _serp_positions(data, subject)
+    rows, ranked, home, measured = [], 0, 0, 0
+    for keyword in keywords:
+        term = keyword.strip().lower()
+        if term not in positions:
+            continue
+        measured += 1
+        best = positions[term]
+        if best and (best.get("position") or 999) <= 10:
+            ranked += 1
+            is_home = _is_home_url(best.get("url"))
+            home += 1 if is_home else 0
+            rows.append("'{0}' #{1}{2}".format(keyword, best.get("position"),
+                                                " (home page)" if is_home else ""))
+        else:
+            rows.append("'{0}' not in top 10".format(keyword))
+    return {"keywords": keywords, "measured": measured, "ranked": ranked, "home": home,
+            "rows": rows, "positions": positions}
+
+
+def score_f1(subject, data):
+    """Local pack presence, from the geo-grid at each location."""
+    locations = (data.get("apify") or {}).get("locations") or []
+    location_scores, bits, by_name = [], [], 0
+    for loc in locations:
+        fid = (loc.get("resolved") or {}).get("fid")
+        keyword_scores = []
+        for _, block in sorted((loc.get("grid") or {}).items()):
+            items = block.get("items") or []
+            if not items:
+                continue
+            n = len(items)
+            top3 = in10 = absent = wrong = 0
+            for item in items:
+                rank = item.get("rank")
+                hit = bool(item.get("found")) and rank is not None
+                if hit and fid and item.get("foundPlaceId") and item["foundPlaceId"] != fid:
+                    wrong += 1
+                    hit = False
+                if not hit:
+                    absent += 1
+                    continue
+                top3 += 1 if rank <= 3 else 0
+                in10 += 1 if rank <= 10 else 0
+            if top3 * 2 > n and absent == 0:
+                keyword_scores.append(2)
+            elif top3 > 0 or in10 * 2 >= n:
+                keyword_scores.append(1)
+            else:
+                keyword_scores.append(0)
+            bits.append("{0}, '{1}': top 3 at {2}/{5} points, top 10 at {3}/{5}, absent at "
+                        "{4}/{5}{6}".format(loc.get("label"), block.get("keyword"), top3, in10,
+                                            absent, n,
+                                            "" if not wrong else " ({0} hits were a different "
+                                            "branch with the same name, counted absent)".format(wrong)))
+        if keyword_scores:
+            location_scores.append(_rollup(keyword_scores))
+            by_name += 0 if fid else 1
+    if not location_scores:
+        return null("the geo-grid was not run; it needs locations[] and keywords[]",
+                    APIFY_CMD, _apify_source(data, "grid"))
+    evidence = "; ".join(bits)
+    if by_name:
+        evidence += ("; {0} location(s) matched by business name, not place ID, so a same-name "
+                     "listing nearby may be counted".format(by_name))
+    return result(_rollup(location_scores), evidence, APIFY_CMD, _apify_source(data, "grid"))
+
+
+def score_f2(subject, data):
+    """Organic visibility for category terms."""
+    vis = _category_visibility(data, subject)
+    if not vis["keywords"]:
+        return null("needs keywords[]: the terms a customer would type", APIFY_CMD,
+                    _apify_source(data, "serp"))
+    if not vis["measured"]:
+        return null("no search results were collected for the keywords", APIFY_CMD,
+                    _apify_source(data, "serp"))
+    share = vis["ranked"] / float(vis["measured"])
+    if share >= 0.5:
+        score = 1 if vis["home"] * 2 > vis["ranked"] else 2
+    elif vis["ranked"]:
+        score = 1
+    else:
+        score = 0
+    evidence = ("own site in the organic top 10 for {0} of {1} category terms: {2}; home page "
+                "is the ranking URL for {3} of them; one results page per query, Google US "
+                "desktop, no personalisation".format(vis["ranked"], vis["measured"],
+                                                     "; ".join(vis["rows"]), vis["home"]))
+    return result(score, evidence, APIFY_CMD, _apify_source(data, "serp"))
+
+
+def score_f3(subject, data):
+    """Branded versus non-branded dependency."""
+    vis = _category_visibility(data, subject)
+    if not vis["keywords"] or not vis["measured"]:
+        return null("needs category keywords[] and their search results to compare against "
+                    "the brand", APIFY_CMD, _apify_source(data, "serp"))
+    brand = subject["name"].strip().lower()
+    if brand in vis["positions"]:
+        best = vis["positions"][brand]
+        branded = "#{0}".format(best.get("position")) if best else "not in the top 10"
+    else:
+        branded = "not measured"
+    share = vis["ranked"] / float(vis["measured"])
+    score = 2 if share >= 0.5 else (1 if vis["ranked"] else 0)
+    evidence = ("own name '{0}': own site {1}; category terms: top 10 for {2} of {3}".format(
+        subject["name"], branded, vis["ranked"], vis["measured"]))
+    if score == 0:
+        evidence += ("; found for its name only" if branded.startswith("#")
+                     else "; not found for its name or its category")
+    return result(score, evidence, APIFY_CMD, _apify_source(data, "serp"))
+
+
+def score_t1(subject, data):
+    """Review volume and rating versus the competitors pulled around each location."""
+    ap = data.get("apify") or {}
+    as_of = parse_date_loose(ap.get("collected_at"))
+    location_scores, bits = [], []
+    for loc in ap.get("locations") or []:
+        places = (loc.get("places") or {}).get("items") or []
+        own = _own_listing(loc, places, subject)
+        if not places:
+            continue
+        if own is None:
+            bits.append("{0}: own listing not in the {1} places pulled; add place_id".format(
+                loc.get("label"), len(places)))
+            continue
+        others = [p for p in places if p is not own and p.get("reviewsCount") is not None]
+        if len(others) < 3:
+            bits.append("{0}: only {1} competitors pulled, too few to compare".format(
+                loc.get("label"), len(others)))
+            continue
+        median_count = _median([p.get("reviewsCount") for p in others])
+        median_rating = _median([p.get("totalScore") for p in others])
+        count, rating = own.get("reviewsCount") or 0, own.get("totalScore") or 0
+        reviews = (loc.get("reviews") or {}).get("items")
+        growing = None
+        if reviews is not None and as_of:
+            recent = [r for r in reviews if parse_date_loose(r.get("publishedAtDate"))
+                      and (as_of - parse_date_loose(r.get("publishedAtDate"))).days
+                      <= RECENT_REVIEW_DAYS]
+            growing = bool(recent)
+        if rating <= median_rating - 0.3 or count < 0.25 * median_count:
+            score = 0
+        elif count >= median_count and rating >= median_rating and growing is not False:
+            score = 2
+        else:
+            score = 1
+        location_scores.append(score)
+        bits.append("{0}: {1} reviews at {2} vs competitor median {3:g} at {4:g} ({5} "
+                    "competitors); {6}".format(
+                        loc.get("label"), count, rating, median_count, median_rating,
+                        len(others),
+                        "growth not measured" if growing is None else
+                        ("new reviews in the last {0} days".format(RECENT_REVIEW_DAYS) if growing
+                         else "no new reviews in the last {0} days".format(RECENT_REVIEW_DAYS))))
+    if not location_scores:
+        return null("; ".join(bits) or "no places were pulled around the locations",
+                    APIFY_CMD, _apify_source(data, "places"))
+    return result(_rollup(location_scores), "; ".join(bits), APIFY_CMD,
+                  _apify_source(data, "places"))
+
+
+def _latency_days(review):
+    published = parse_date_loose(review.get("publishedAtDate"))
+    replied = parse_date_loose(review.get("responseFromOwnerDate"))
+    if not published or not replied:
+        return None
+    days = (replied - published).total_seconds() / 86400.0
+    return days if days > 0 else None   # edited reviews give non-positive latencies
+
+
+def _fmt_days(days):
+    if days is None:
+        return "n/a"
+    return "{0:.0f} min".format(days * 1440) if days < 1.0 / 24 else (
+        "{0:.1f} h".format(days * 24) if days < 1 else "{0:.1f} days".format(days))
+
+
+def score_t2(subject, data):
+    """Review response rate and latency, from the newest reviews per location."""
+    location_scores, bits = [], []
+    for loc in (data.get("apify") or {}).get("locations") or []:
+        reviews = (loc.get("reviews") or {}).get("items")
+        if not reviews:
+            continue
+        n = len(reviews)
+        answered = [r for r in reviews if r.get("responseFromOwnerDate")]
+        negative = [r for r in reviews if (r.get("stars") or 0) <= 2]
+        positive = [r for r in reviews if (r.get("stars") or 0) >= 4]
+        neg_answered = [r for r in negative if r.get("responseFromOwnerDate")]
+        pos_answered = [r for r in positive if r.get("responseFromOwnerDate")]
+        rate = len(answered) / float(n)
+        median_latency = _median([_latency_days(r) for r in answered])
+        neg_latency = _median([_latency_days(r) for r in neg_answered])
+        pos_latency = _median([_latency_days(r) for r in pos_answered])
+        neg_rate = len(neg_answered) / float(len(negative)) if negative else None
+        pos_rate = len(pos_answered) / float(len(positive)) if positive else None
+        if rate < 0.5:
+            score = 0
+        else:
+            slow = median_latency is not None and median_latency > REVIEW_REPLY_SLA_DAYS
+            negatives_first = (neg_rate is None or pos_rate is None or neg_rate >= pos_rate) and \
+                (neg_latency is None or pos_latency is None or neg_latency <= pos_latency)
+            score = 2 if not slow and negatives_first else 1
+        location_scores.append(score)
+        bits.append("{0}: {1} of the newest {2} reviews answered ({3:.0%}), median reply {4}; "
+                    "1-2 stars: {5} of {6} answered, median {7}; 4-5 stars: {8} of {9} answered, "
+                    "median {10}".format(loc.get("label"), len(answered), n, rate,
+                                         _fmt_days(median_latency), len(neg_answered),
+                                         len(negative), _fmt_days(neg_latency),
+                                         len(pos_answered), len(positive),
+                                         _fmt_days(pos_latency)))
+    if not location_scores:
+        return null("no reviews were pulled for any location", APIFY_CMD,
+                    _apify_source(data, "reviews"))
+    evidence = "; ".join(bits) + "; reply SLA assumed {0} days".format(REVIEW_REPLY_SLA_DAYS)
+    return result(_rollup(location_scores), evidence, APIFY_CMD, _apify_source(data, "reviews"))
+
+
+def score_t3(subject, data):
+    """Profile completeness and posting cadence, per location."""
+    location_scores, bits = [], []
+    for loc in (data.get("apify") or {}).get("locations") or []:
+        places = (loc.get("places") or {}).get("items") or []
+        if not places:
+            continue
+        own = _own_listing(loc, places, subject)
+        if own is None:
+            bits.append("{0}: own listing not found; add place_id".format(loc.get("label")))
+            continue
+        missing = [label for label, present in (
+            ("category", own.get("categories") or own.get("categoryName")),
+            ("hours", own.get("openingHours")),
+            ("phone", own.get("phone")),
+            ("website", own.get("website")),
+            ("description", own.get("ownerDescription") or own.get("description")),
+            ("10+ photos", (own.get("imagesCount") or 0) >= 10),
+        ) if not present]
+        questions = own.get("questionsAndAnswers") or []
+        unanswered = sum(1 for q in questions if not q.get("answers"))
+        owner_answers = sum(1 for q in questions if any(a.get("byOwner") for a in q.get("answers") or []))
+        posts = len(own.get("ownerUpdates") or [])
+        unclaimed = bool(own.get("claimThisBusiness"))
+        if unclaimed or len(missing) >= 2:
+            score = 0
+        elif not missing and posts and not unanswered:
+            score = 2
+        else:
+            score = 1
+        location_scores.append(score)
+        bits.append("{0}: {1}{2}; {3} owner post(s) visible; {4} questions, {5} unanswered, {6} "
+                    "answered by the owner".format(
+                        loc.get("label"), "UNCLAIMED listing; " if unclaimed else "",
+                        "complete" if not missing else "missing " + ", ".join(missing),
+                        posts, len(questions), unanswered, owner_answers))
+    if not location_scores:
+        return null("; ".join(bits) or "no profile data was pulled", APIFY_CMD,
+                    _apify_source(data, "places"))
+    evidence = "; ".join(bits) + ("; Google can hide posts from logged-out views, so no "
+                                  "visible posts is not proof of none")
+    return result(_rollup(location_scores), evidence, APIFY_CMD, _apify_source(data, "places"))
+
+
 CHECK_SCORERS = {
     "F4": score_f4, "F5": score_f5,
     "S1": score_s1, "S2": score_s2, "S3": score_s3,
     "W1": score_w1, "W2": score_w2, "W3": score_w3, "W4": score_w4,
     "M1": score_m1, "M2": score_m2, "M3": score_m3,
     "O1": score_o1, "O2": score_o2,
+    "F1": score_f1, "F2": score_f2, "F3": score_f3,
+    "T1": score_t1, "T2": score_t2, "T3": score_t3,
 }
 
 
@@ -1133,7 +1484,8 @@ def score_subject(subject, checks, data, manual):
                 row["evidence"] = "not scored: " + row["evidence"]
         elif not applicable:
             row = na(reason, command=check.get("command"))
-        elif check_id in CHECK_SCORERS:
+        elif check_id in CHECK_SCORERS and (check_id not in PAID_SCORED_CHECKS
+                                            or data.get("apify")):
             row = CHECK_SCORERS[check_id](subject, data)
         else:
             cost = check.get("cost", "paid")
@@ -1332,7 +1684,8 @@ def verdict_for(subject, rows, summary):
 def load_collector_outputs(out_dir, domain):
     slug = safe_slug(domain)
     data = {}
-    for key, prefix in (("signals", "signals__"), ("email", "email__"), ("content", "content__")):
+    for key, prefix in (("signals", "signals__"), ("email", "email__"), ("content", "content__"),
+                        ("apify", "apify__")):
         path = os.path.join(out_dir, prefix + slug + ".json")
         if os.path.isfile(path):
             try:
@@ -1668,7 +2021,12 @@ def main(argv=None):
     if os.path.isfile(paid_path):
         try:
             paid_payload = read_json(paid_path)
+            # A subject with Apify results is scored from them, not from this file.
+            with_apify = set(subject["name"] for subject in subjects if os.path.isfile(
+                os.path.join(args.out_dir, "apify__" + safe_slug(subject["domain"]) + ".json")))
             for subject_name, rows in (paid_payload.get("results") or {}).items():
+                if subject_name in with_apify:
+                    continue
                 manual.setdefault(subject_name, {}).update(rows)
         except Exception as exc:  # noqa: BLE001
             sys.stderr.write("warning: could not read {0}: {1}\n".format(paid_path, exc))

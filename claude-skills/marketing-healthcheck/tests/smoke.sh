@@ -661,6 +661,155 @@ else
   fail "regression 11: cached files are not keyed or headed as documented"
 fi
 
+# ---------------------------------------------------------------------------
+# Apify paid checks: real actor output captured 2026-10-20 (tests/fixtures/apify),
+# plus a local mock of the Apify API. Nothing here touches the network or spends.
+# ---------------------------------------------------------------------------
+FIX="${ROOT}/tests/fixtures/apify"
+AP_OUT="${OUT_DIR}/apify"
+mkdir -p "${AP_OUT}"
+"${PY}" "${SCRIPTS}/apify_collect.py" --targets "${FIX}/targets.json" --import-dir "${FIX}" \
+  --out-dir "${AP_OUT}" --collected-at 2026-10-20T17:00:00Z >/dev/null 2>&1
+"${PY}" "${SCRIPTS}/scorecard.py" --out-dir "${AP_OUT}" --targets "${FIX}/targets.json" >/dev/null 2>&1
+
+assert_python "apify 1: real fixtures score F1-F3 and T1-T3 from Apify output" "
+import json
+d = json.load(open('${AP_OUT}/scorecard.json'))
+rows = d['subjects'][0]['rows']
+rows = rows if isinstance(rows, dict) else {r['check_id']: r for r in rows}
+got = {c: rows[c]['score'] for c in ('F1', 'F2', 'F3', 'T1', 'T2', 'T3')}
+assert got == {'F1': 0, 'F2': 0, 'F3': 0, 'T1': 2, 'T2': 0, 'T3': 1}, got
+assert '3 hits were a different branch' in rows['F1']['evidence'], rows['F1']['evidence']
+assert 'own site #1' in rows['F3']['evidence'], rows['F3']['evidence']
+assert '2 of the newest 20' in rows['T2']['evidence'], rows['T2']['evidence']
+assert all(rows[c]['source'].startswith('apify: ') for c in got), [rows[c]['source'] for c in got]
+"
+
+assert_python "apify 2: the grid is matched by the location's own place ID, resolved first" "
+import json
+d = json.load(open('${AP_OUT}/apify__bluebottlecoffee.com.json'))
+loc = d['locations'][0]
+assert loc['resolved']['match'] == 'place_id', loc['resolved']
+grid = [r for r in d['runs'] if r['key'] == 'grid__loc0__kw0'][0]
+assert grid['input'].get('placeId') == loc['resolved']['fid'], grid['input']
+"
+
+assert_python "apify 3: no reviewer or Q&A author data is kept" "
+import json
+text = open('${AP_OUT}/apify__bluebottlecoffee.com.json').read()
+for banned in ('answeredBy', 'askedBy', 'reviewerId', 'reviewerUrl', '\"name\":', '\"text\":'):
+    assert banned not in text, banned
+d = json.loads(text)
+assert d['locations'][0]['reviews']['items'][0].keys() >= {'stars', 'publishedAtDate'}
+"
+
+assert_python "apify 4: the plan prices every run and the total, spending nothing" "
+import subprocess, sys
+out = subprocess.run([sys.executable, '${SCRIPTS}/apify_collect.py', '--targets', '${FIX}/targets.json',
+                      '--budget-usd', '1'], capture_output=True, text=True)
+assert out.returncode == 0, out.stderr
+for needle in ('serp', 'places__loc0', 'reviews__loc0', 'grid__loc0__kw0',
+               'Estimated total: \$0.20', 'Nothing has been spent'):
+    assert needle in out.stdout, (needle, out.stdout)
+"
+
+assert_python "apify 5: --yes without APIFY_TOKEN refuses and writes nothing" "
+import os, subprocess, sys, tempfile
+tmp = tempfile.mkdtemp()
+env = dict(os.environ); env.pop('APIFY_TOKEN', None)
+out = subprocess.run([sys.executable, '${SCRIPTS}/apify_collect.py', '--targets', '${FIX}/targets.json',
+                      '--budget-usd', '1', '--yes', '--out-dir', tmp], capture_output=True, text=True, env=env)
+assert out.returncode == 4, (out.returncode, out.stderr)
+assert 'APIFY_TOKEN is not set' in out.stderr and not os.listdir(tmp)
+"
+
+assert_python "apify 6: an estimate over the budget refuses before any run" "
+import subprocess, sys
+out = subprocess.run([sys.executable, '${SCRIPTS}/apify_collect.py', '--targets', '${FIX}/targets.json',
+                      '--budget-usd', '0.10', '--yes'], capture_output=True, text=True,
+                     env={'APIFY_TOKEN': 'unused', 'PATH': '/usr/bin:/bin'})
+assert out.returncode == 3 and 'Refusing to proceed' in out.stdout, (out.returncode, out.stdout)
+"
+
+assert_python "apify 7: mock API run: bearer token, places before grid, real costs, budget stop" "
+import json, os, subprocess, sys, tempfile, threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
+FIX = '${FIX}'
+DATA = {'apify~google-search-scraper': 'serp', 'compass~crawler-google-places': 'places__loc0',
+        'compass~Google-Maps-Reviews-Scraper': 'reviews__loc0',
+        'fayoussef~geo-grid-local-rank-tracker': 'grid__loc0__kw0'}
+seen = []
+class H(BaseHTTPRequestHandler):
+    def log_message(self, *a): pass
+    def reply(self, obj):
+        body = json.dumps(obj).encode(); self.send_response(201)
+        self.send_header('Content-Type', 'application/json'); self.end_headers(); self.wfile.write(body)
+    def run(self, actor):
+        return {'data': {'id': 'run-' + actor, 'status': 'SUCCEEDED', 'defaultDatasetId': DATA[actor],
+                         'chargedEventCounts': {'unit': 1},
+                         'pricingInfo': {'pricingPerEvent': {'actorChargeEvents': {'unit': {'eventPriceUsd': 0.05}}}}}}
+    def do_POST(self):
+        actor = self.path.split('/acts/')[1].split('/')[0]
+        body = json.loads(self.rfile.read(int(self.headers['Content-Length'])))
+        seen.append((actor, self.headers.get('Authorization'), body))
+        self.reply(self.run(actor))
+    def do_GET(self):
+        if '/datasets/' in self.path:
+            key = self.path.split('/datasets/')[1].split('/')[0]
+            self.reply(json.load(open(os.path.join(FIX, key + '.json'))))
+        else:
+            actor = self.path.split('/actor-runs/run-')[1].split('?')[0]
+            self.reply(self.run(actor))
+server = HTTPServer(('127.0.0.1', 0), H)
+threading.Thread(target=server.serve_forever, daemon=True).start()
+tmp = tempfile.mkdtemp()
+env = dict(os.environ, APIFY_TOKEN='test-token', APIFY_API_BASE='http://127.0.0.1:%d/v2' % server.server_port)
+out = subprocess.run([sys.executable, '${SCRIPTS}/apify_collect.py', '--targets', os.path.join(FIX, 'targets.json'),
+                      '--budget-usd', '0.20', '--yes', '--out-dir', tmp], capture_output=True, text=True, env=env)
+server.shutdown()
+assert out.returncode == 0, out.stdout + out.stderr
+assert all(auth == 'Bearer test-token' for _, auth, _ in seen), seen
+order = [a for a, _, _ in seen]
+assert order.index('compass~crawler-google-places') < order.index('compass~Google-Maps-Reviews-Scraper'), order
+d = json.load(open(os.path.join(tmp, 'apify__bluebottlecoffee.com.json')))
+assert d['spent_usd'] == 0.15, d['spent_usd']
+grid = [r for r in d['runs'] if r['key'] == 'grid__loc0__kw0'][0]
+assert grid['status'] == 'skipped' and grid['reason'] == 'budget', grid
+assert 'fayoussef~geo-grid-local-rank-tracker' not in order, order
+"
+
+assert_python "apify 8: a stale paid__unavailable.json cannot override Apify results" "
+import json, shutil, subprocess, sys, tempfile
+tmp = tempfile.mkdtemp()
+shutil.copy('${AP_OUT}/apify__bluebottlecoffee.com.json', tmp)
+json.dump({'results': {'Blue Bottle Coffee': {'T1': {'score': None, 'evidence': 'not scored: stale',
+           'reason': 'stale', 'source': 'paid tool unavailable'}}}},
+          open(tmp + '/paid__unavailable.json', 'w'))
+subprocess.run([sys.executable, '${SCRIPTS}/scorecard.py', '--out-dir', tmp, '--targets', '${FIX}/targets.json'],
+               capture_output=True)
+rows = json.load(open(tmp + '/scorecard.json'))['subjects'][0]['rows']
+rows = rows if isinstance(rows, dict) else {r['check_id']: r for r in rows}
+assert rows['T1']['score'] == 2, rows['T1']
+"
+
+assert_python "apify 9: MCP route: a second --plan-json pass carries the resolved IDs" "
+import json, os, shutil, subprocess, sys, tempfile
+tmp = tempfile.mkdtemp()
+targets = json.load(open('${FIX}/targets.json'))
+targets['subjects'][0]['locations'][0].pop('place_id')
+json.dump(targets, open(tmp + '/t.json', 'w'))
+def plan(*extra):
+    out = subprocess.run([sys.executable, '${SCRIPTS}/apify_collect.py', '--targets', tmp + '/t.json',
+                          '--plan-json'] + list(extra), capture_output=True, text=True)
+    return {r['key']: r for r in json.loads(out.stdout)[0]['runs']}
+first = plan()
+assert first['reviews__loc0']['needs'] == 'places__loc0' and not first['reviews__loc0']['input']['placeIds']
+os.mkdir(tmp + '/items'); shutil.copy('${FIX}/places__loc0.json', tmp + '/items/')
+second = plan('--import-dir', tmp + '/items')
+assert second['reviews__loc0']['input']['placeIds'] == ['ChIJSy28upiAhYARkoxpzFnW7b4'], second['reviews__loc0']
+assert second['grid__loc0__kw0']['input']['placeId'] == '0x80858098babc2d4b:0xbeedd659cc698c92'
+"
+
 printf '\n%s\n' "----------------------------------------------------------------------"
 printf 'passed: %d   failed: %d\n' "${PASSED}" "${FAILED}"
 

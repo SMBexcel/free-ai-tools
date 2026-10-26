@@ -1,0 +1,146 @@
+[
+ {
+  "businessName": "Blue Bottle Coffee",
+  "keyword": "coffee shop",
+  "pointIndex": 0,
+  "gridRow": 0,
+  "gridCol": 0,
+  "rank": 10,
+  "found": true,
+  "foundName": "Blue Bottle Coffee",
+  "foundPlaceId": "0x80858098babc2d4b:0xbeedd659cc698c92",
+  "topCompetitors": [
+   "The Coffee Movement",
+   "Third Wheel Coffee",
+   "Compton's Coffee House"
+  ]
+ },
+ {
+  "businessName": "Blue Bottle Coffee",
+  "keyword": "coffee shop",
+  "pointIndex": 1,
+  "gridRow": 0,
+  "gridCol": 1,
+  "rank": 12,
+  "found": true,
+  "foundName": "Blue Bottle Coffee",
+  "foundPlaceId": "0x808580620f5d41dd:0x13b2c33ee2dfe160",
+  "topCompetitors": [
+   "The Coffee Movement",
+   "Third Wheel Coffee",
+   "Compton's Coffee House"
+  ]
+ },
+ {
+  "businessName": "Blue Bottle Coffee",
+  "keyword": "coffee shop",
+  "pointIndex": 2,
+  "gridRow": 0,
+  "gridCol": 2,
+  "rank": 12,
+  "found": true,
+  "foundName": "Blue Bottle Coffee",
+  "foundPlaceId": "0x808580620f5d41dd:0x13b2c33ee2dfe160",
+  "topCompetitors": [
+   "The Coffee Movement",
+   "Third Wheel Coffee",
+   "Compton's Coffee House"
+  ]
+ },
+ {
+  "businessName": "Blue Bottle Coffee",
+  "keyword": "coffee shop",
+  "pointIndex": 3,
+  "gridRow": 1,
+  "gridCol": 0,
+  "rank": 13,
+  "found": true,
+  "foundName": "Blue Bottle Coffee",
+  "foundPlaceId": "0x80858098babc2d4b:0xbeedd659cc698c92",
+  "topCompetitors": [
+   "The Coffee Movement",
+   "Third Wheel Coffee",
+   "Compton's Coffee House"
+  ]
+ },
+ {
+  "businessName": "Blue Bottle Coffee",
+  "keyword": "coffee shop",
+  "pointIndex": 4,
+  "gridRow": 1,
+  "gridCol": 1,
+  "rank": 9,
+  "found": true,
+  "foundName": "Blue Bottle Coffee",
+  "foundPlaceId": "0x80858098babc2d4b:0xbeedd659cc698c92",
+  "topCompetitors": [
+   "The Coffee Movement",
+   "Third Wheel Coffee",
+   "Compton's Coffee House"
+  ]
+ },
+ {
+  "businessName": "Blue Bottle Coffee",
+  "keyword": "coffee shop",
+  "pointIndex": 5,
+  "gridRow": 1,
+  "gridCol": 2,
+  "rank": 15,
+  "found": true,
+  "foundName": "Blue Bottle Coffee",
+  "foundPlaceId": "0x808580620f5d41dd:0x13b2c33ee2dfe160",
+  "topCompetitors": [
+   "The Coffee Movement",
+   "Third Wheel Coffee",
+   "Compton's Coffee House"
+  ]
+ },
+ {
+  "businessName": "Blue Bottle Coffee",
+  "keyword": "coffee shop",
+  "pointIndex": 6,
+  "gridRow": 2,
+  "gridCol": 0,
+  "rank": 14,
+  "found": true,
+  "foundName": "Blue Bottle Coffee",
+  "foundPlaceId": "0x80858098babc2d4b:0xbeedd659cc698c92",
+  "topCompetitors": [
+   "The Coffee Movement",
+   "Third Wheel Coffee",
+   "Compton's Coffee House"
+  ]
+ },
+ {
+  "businessName": "Blue Bottle Coffee",
+  "keyword": "coffee shop",
+  "pointIndex": 7,
+  "gridRow": 2,
+  "gridCol": 1,
+  "rank": null,
+  "found": false,
+  "foundName": null,
+  "foundPlaceId": null,
+  "topCompetitors": [
+   "The Coffee Movement",
+   "Third Wheel Coffee",
+   "Compton's Coffee House"
+  ]
+ },
+ {
+  "businessName": "Blue Bottle Coffee",
+  "keyword": "coffee shop",
+  "pointIndex": 8,
+  "gridRow": 2,
+  "gridCol": 2,
+  "rank": 14,
+  "found": true,
+  "foundName": "Blue Bottle Coffee",
+  "foundPlaceId": "0x80858098babc2d4b:0xbeedd659cc698c92",
+  "topCompetitors": [
+   "The Coffee Movement",
+   "Third Wheel Coffee",
+   "Compton's Coffee House"
+  ]
+ }
+]

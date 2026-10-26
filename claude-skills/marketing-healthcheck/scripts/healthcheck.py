@@ -11,8 +11,9 @@ Standard library only, Python 3.9 compatible.
 
 ``--paid`` refuses to run without ``--budget-usd``. Given a budget it prints the
 planned work and an estimated cost and stops; it proceeds only with ``--yes``.
-No paid provider ships with this skill, so paid checks are recorded as ``null``
-with a reason rather than failing the run or guessing a number.
+The paid checks (F1-F3, T1-T3) run on Apify through scripts/apify_collect.py when
+``APIFY_TOKEN`` is set. Without a token they are recorded as ``null`` with a reason
+rather than failing the run or guessing a number.
 
 Targets file shape (see assets/targets.example.json):
 
@@ -21,10 +22,10 @@ Targets file shape (see assets/targets.example.json):
         {
           "name": "ExampleCo",
           "domain": "example.com",
-          "category": "widget services",
-          "keywords": ["widget repair", "emergency widget service"],
+          "category": "bookkeeping and payroll for small businesses",
+          "keywords": ["bookkeeping services", "small business accountant"],
           "locations": [
-            {"label": "Northtown", "lat": 40.10, "lng": -74.20, "place_id": "PLACE_ID_1"}
+            {"label": "Office A", "lat": 10.0, "lng": 20.0, "place_id": "EXAMPLE_PLACE_ID"}
           ],
           "expects": {"posts_per_month": 4},
           "publishes": true,
@@ -339,8 +340,8 @@ def build_parser():
             "  python3 scripts/healthcheck.py --targets targets.json --paid --budget-usd 40 --yes\n\n"
             "Targets file: {\"subjects\": [{\"name\": \"ExampleCo\", \"domain\": \"example.com\"}]}\n"
             "See assets/targets.example.json for every optional field.\n\n"
-            "No paid provider ships with this skill. With --paid --yes, paid checks are\n"
-            "recorded as null with a reason rather than failing the run or guessing."),
+            "Paid checks run on Apify when APIFY_TOKEN is set (scripts/apify_collect.py).\n"
+            "Without a token, --paid --yes records them as null with a reason."),
         formatter_class=argparse.RawDescriptionHelpFormatter)
 
     parser.add_argument("--targets", required=True,
@@ -458,7 +459,25 @@ def main(argv=None):
     # ---- paid gate --------------------------------------------------------
     paid_plan = None
     paid_note = None
-    if args.paid:
+    use_apify = args.paid and bool(os.environ.get("APIFY_TOKEN", "").strip())
+    apify_args = ["--targets", args.targets, "--out-dir", args.out_dir,
+                  "--grid-size", str(max(1, int(round(args.grid_points ** 0.5))))]
+    if args.only:
+        apify_args += ["--only", args.only]
+    if args.paid and use_apify:
+        apify_args += ["--budget-usd", str(args.budget_usd)]
+        outcome = run_script("apify_collect.py", apify_args, args.dry_run)
+        if outcome["stdout"]:
+            sys.stdout.write(outcome["stdout"] + "\n")
+        if outcome.get("returncode") == 3:
+            return 3
+        if outcome.get("returncode") not in (0, None):
+            sys.stderr.write((outcome["stderr"] or "apify_collect.py failed") + "\n")
+            return outcome["returncode"]
+        paid_plan = {"provider": "apify", "planner": "apify_collect.py"}
+        if not args.yes:
+            return 0
+    elif args.paid:
         paid_plan = plan_paid(subjects, args, checks)
         print_paid_plan(paid_plan, args.budget_usd)
         if paid_plan["estimated_total_usd"] > args.budget_usd:
@@ -477,8 +496,9 @@ def main(argv=None):
             return 0
         write_json(os.path.join(args.out_dir, "paid_plan.json"), paid_plan)
         paid_note = (
-            "no paid provider is configured in this skill, so the paid checks were "
-            "planned and costed but not executed")
+            "APIFY_TOKEN is not set, so the paid checks were planned and costed but not "
+            "executed. Export APIFY_TOKEN to run them on Apify, or fetch them through the "
+            "Apify MCP connector and assemble with apify_collect.py --import-dir")
         sys.stdout.write("\n" + paid_note + ". Recording null for the paid checks.\n")
 
     # ---- collectors -------------------------------------------------------
@@ -490,7 +510,26 @@ def main(argv=None):
         for subject in subjects:
             collect_for_subject(subject, args, log)
 
-    if args.paid and args.yes and not args.dry_run:
+    if use_apify and args.yes and not args.dry_run:
+        sys.stdout.write("\n== paid checks on Apify ==\n")
+        outcome = run_script("apify_collect.py",
+                             apify_args + ["--budget-usd", str(args.budget_usd), "--yes"],
+                             False, timeout=3600)
+        log.append(outcome)
+        if outcome["stdout"]:
+            sys.stdout.write(outcome["stdout"] + "\n")
+        if outcome.get("returncode") == 0:
+            stale = os.path.join(args.out_dir, "paid__unavailable.json")
+            if os.path.isfile(stale):
+                os.remove(stale)
+            paid_note = "paid checks collected on Apify; see apify__<domain>.json"
+        else:
+            lines = (outcome["stderr"] or "").strip().splitlines()
+            paid_note = "the Apify run failed ({0}); paid checks recorded as null".format(
+                lines[-1] if lines else "see run_log.json")
+            path = record_paid_nulls(subjects, checks, args.out_dir, paid_note)
+            sys.stdout.write("\nwrote {0}\n".format(path))
+    elif args.paid and args.yes and not args.dry_run:
         path = record_paid_nulls(subjects, checks, args.out_dir, paid_note)
         sys.stdout.write("\nwrote {0}\n".format(path))
 

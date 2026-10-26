@@ -100,6 +100,33 @@ Then, separately from the run limits, put an account-level spend cap on the bill
 
 **The confirmation step is not optional.** Before any paid call: state the plan, the unit count, the unit price and the total, and get an explicit yes. Not "this will cost a few dollars". The number. The reason is not frugality, it is that quoting 450 points forces you to have decided on the grid size, the keyword list and the location list, and every one of those decisions is also an accuracy decision.
 
+## The paid tier on Apify
+
+`scripts/apify_collect.py` runs the six paid checks on Apify. Actors, as tested on 2026-10-20:
+
+| Run key | Checks | Actor | Bounded by | Unit price used in estimates |
+|---|---|---|---|---|
+| `serp` | F2, F3 | `apify/google-search-scraper` | one results page per query | $0.003 per page |
+| `places__locN` | T1, T3 | `compass/crawler-google-places` | `--competitors` + 1 places around the location's coordinates, detail page on | $0.006 per place |
+| `reviews__locN` | T2, T1 growth | `compass/Google-Maps-Reviews-Scraper` | `--max-reviews` newest, `personalData: false` | $0.0005 per review |
+| `grid__locN__kwK` | F1 | `fayoussef/geo-grid-local-rank-tracker` | `--grid-size` squared points | $0.004 per point |
+
+Estimates use the higher of the free-plan and paid-plan unit price, so a paid plan comes in under them. Read the live price on apify.com before quoting a client.
+
+**What the testing turned up, and what the collector does about it:**
+
+- **Apify refuses a per-run charge cap below $0.50** on some actors ("Maximum cost per run is less than the allowed minimum"). A tiny cap cannot be set, so the run's own input is the real limit: places, pages, reviews, points. The collector sets the cap to max($0.50, 2x the estimate), tracks the charged cost of every finished run, and will not start one that would take the total past `--budget-usd`. Put an account-level limit on the Apify account as well.
+- **Name matching counts the wrong branch.** A 3x3 grid for one Blue Bottle Coffee cafe, matched by name, found a different Blue Bottle branch at 3 of 9 points. The collector runs the places pull first, resolves the location's own listing (by `place_id`, then website, then exact name), and hands its `fid` to the grid. F1 then counts any other listing as absent and says how many it discarded. A location whose listing could not be resolved is flagged in the evidence as matched by name.
+- **The grid wants the `0x...:0x...` ID, the reviews scraper wants `ChIJ...`.** The places pull returns both (`fid`, `placeId`); targets need only `place_id` in the `ChIJ` form, or nothing if the listing's website matches the domain.
+- **Google rank runs from the US with no location.** For a local business, write keywords with the city (`dentist austin`), or F2 measures national results.
+- **No owner posts visible is not proof of none.** Google can hide posts from logged-out views. T3 says so in its evidence.
+- **Personal data is dropped at collection:** no reviewer IDs, names or text; Q&A authors reduced to an owner-or-not flag.
+
+**Two routes, one output (`out/apify__<domain>.json`):**
+
+1. **Token.** `export APIFY_TOKEN=...`, then `healthcheck.py --paid --budget-usd N` (plan) and the same with `--yes` (run).
+2. **Apify MCP connector, no token.** `apify_collect.py --targets t.json --plan-json` lists every run's key, actor and input. Call each actor through the connector with that input and save its dataset items as `<dir>/<key>.json`. Run the `places__*` keys first, then `--plan-json --import-dir <dir>` again: the reviews and grid inputs now carry the resolved IDs. Run those, then `apify_collect.py --targets t.json --import-dir <dir>` and `scorecard.py`.
+
 ## Sequencing
 
 Run cheap checks first so they can eliminate subjects before expensive ones execute. Each stage is a gate.

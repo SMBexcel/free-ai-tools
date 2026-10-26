@@ -1,6 +1,6 @@
-out/
-manual_results.json
-targets.json
+/out/
+/manual_results.json
+/targets.json
 __pycache__/
 *.pyc
 .DS_Store

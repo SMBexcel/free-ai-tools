@@ -1,0 +1,108 @@
+[
+ {
+  "searchQuery": {
+   "term": "blue bottle coffee",
+   "countryCode": "US",
+   "languageCode": "en",
+   "device": "DESKTOP",
+   "page": 1
+  },
+  "organicResults": [
+   {
+    "position": 1,
+    "url": "https://bluebottlecoffee.com/us/eng?srsltid=AU7gw4U-kwEaokcmGPZfdCzQwQ6KczA8wODNDi9abWAN4sHF5UEBZvsn",
+    "title": "Blue Bottle Coffee | Specialty Coffee",
+    "type": "organic"
+   },
+   {
+    "position": 2,
+    "url": "https://www.instagram.com/bluebottle/?hl=en",
+    "title": "Blue Bottle Coffee (@bluebottle)",
+    "type": "organic"
+   },
+   {
+    "position": 3,
+    "url": "https://en.wikipedia.org/wiki/Blue_Bottle_Coffee",
+    "title": "Blue Bottle Coffee",
+    "type": "organic"
+   },
+   {
+    "position": 4,
+    "url": "https://www.yelp.com/biz/blue-bottle-coffee-georgetown-washington",
+    "title": "Blue Bottle Coffee - Georgetown",
+    "type": "organic"
+   },
+   {
+    "position": 5,
+    "url": "https://www.amazon.com/Blue-Bottle-Coffee-Cold-Brew/dp/B01D8OIHPE",
+    "title": "Blue Bottle Coffee medium roast - Cold Brew Coffee (6 ...",
+    "type": "organic"
+   },
+   {
+    "position": 6,
+    "url": "https://www.youtube.com/@bluebottlecoffee4527",
+    "title": "Blue Bottle Coffee",
+    "type": "organic"
+   }
+  ]
+ },
+ {
+  "searchQuery": {
+   "term": "coffee shop hayes valley san francisco",
+   "countryCode": "US",
+   "languageCode": "en",
+   "device": "DESKTOP",
+   "page": 1
+  },
+  "organicResults": [
+   {
+    "position": 1,
+    "url": "https://sf.eater.com/restaurant-news/210046/kope-house-open-cafe-hayes-valley",
+    "title": "Three Barista Hotshots to Open Their First Cafe in Hayes ...",
+    "type": "organic"
+   },
+   {
+    "position": 2,
+    "url": "https://www.reddit.com/r/AskSF/comments/1tv2f01/cozy_coffeehouse_in_hayes_valley_who_do_we_love/",
+    "title": "Cozy coffeehouse in Hayes Valley? Who do we love?",
+    "type": "organic"
+   },
+   {
+    "position": 3,
+    "url": "https://www.tripadvisor.com/Restaurants-g60713-c8-zfn7222621-San_Francisco_California.html",
+    "title": "The 5 Best Cafés in Hayes Valley San Francisco",
+    "type": "organic"
+   },
+   {
+    "position": 4,
+    "url": "https://sf.eater.com/maps/best-restaurants-bars-cafes-hayes-valley-san-francisco",
+    "title": "Where to Find the Best Food and Drink Around Hayes Valley",
+    "type": "organic"
+   },
+   {
+    "position": 5,
+    "url": "http://www.bakeworkssf.com/",
+    "title": "Hayes Valley Bakeworks - San Francisco",
+    "type": "organic"
+   },
+   {
+    "position": 6,
+    "url": "https://ritualcoffee.com/location/hayes-valley/?srsltid=AU7gw4U9ro1_xc3OU55ocdeQyNNtRTb3wNODtI4ctqtMUYE9G1EThVSf",
+    "title": "Hayes Valley Café",
+    "type": "organic"
+   },
+   {
+    "position": 7,
+    "url": "https://www.yelp.com/search?cflt=coffee&find_loc=Hayes+Valley%2C+San+Francisco%2C+CA+94102",
+    "title": "THE BEST 10 COFFEE & TEA NEAR HAYES VALLEY, ...",
+    "type": "organic"
+   },
+   {
+    "position": 8,
+    "url": "https://www.7x7.com/hayes-valley-san-francisco-guide-2450988297.html",
+    "title": "Hayes Valley: Haven for Shopping, Restaurants + More",
+    "type": "organic"
+   }
+  ]
+ }
+]

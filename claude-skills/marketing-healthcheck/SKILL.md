@@ -16,13 +16,16 @@ Three common uses, same method:
 - **Agency**: what is broken on a prospect's account, evidenced, before the pitch.
 - **Buyer or investor**: how good is this company at the thing it sells, before signing anything.
 
-**12 of the 20 checks are scored automatically and cost nothing.** They need only HTTP and DNS. W1 (speed) also costs nothing but is not bundled: no script here calls PageSpeed Insights, so you run it yourself and put the metric values into `manual_results.json`, and it scores `null` until you do. Six checks need a paid API, and one (M3) is free with an optional paid half. The skill runs and reports without the paid checks rather than blocking.
+**12 of the 20 checks are scored automatically and cost nothing.** They need only HTTP and DNS. W1 (speed) also costs nothing but is not bundled: no script here calls PageSpeed Insights, so you run it yourself and put the metric values into `manual_results.json`, and it scores `null` until you do. **Six checks (F1-F3, T1-T3) run on Apify**, typically $0.20 per location per keyword, and one (M3) is free with an optional paid half. The skill runs and reports without the paid checks rather than blocking.
 
 ## Run order
 
 1. **Scope it.** Get the domain, the business category, and every physical location with its own address. A business with six locations is six tests, not one.
 2. **Run the free tier** (`scripts/healthcheck.py --free`). Writes the collector output and `out/run_log.json`.
-3. **Decide on paid checks.** Tell the user the cost before spending anything. Cap every run. A letter needs at least 10 scored checks, and a single-site business with no locations usually scores 9 on the free tier; offer W1 (a free PageSpeed run, entered in `manual_results.json`) before suggesting paid work to cross that floor.
+3. **Decide on paid checks.** They run on Apify (`scripts/apify_collect.py`). Print the plan first (`--budget-usd N`, no `--yes`), tell the user the dollar estimate, and spend only on a yes. Two routes, same output:
+   - **Token:** with `APIFY_TOKEN` exported, `healthcheck.py --paid --budget-usd N --yes` runs everything.
+   - **Apify MCP connector, no token:** run `apify_collect.py --plan-json`, call each run's `actor` with its `input` through the connector (`maxTotalChargeUsd` 0.5, Apify's minimum), and save each run's dataset items as `<import-dir>/<key>.json`. Do the `places__*` runs first, then run `--plan-json --import-dir <dir>` again so the reviews and grid inputs carry the listing's IDs, run those, and finish with `apify_collect.py --import-dir <dir>`, then `scorecard.py`.
+    A letter needs at least 10 scored checks, and a single-site business with no locations usually scores 9 on the free tier; offer W1 (a free PageSpeed run, entered in `manual_results.json`) before suggesting paid work to cross that floor.
 4. **Score** (`scripts/scorecard.py`). Writes `out/scorecard.json` and `out/scorecard.md`, simple view first, then the matrix.
 5. **Report.** Simple view first. Always.
 
@@ -71,7 +74,7 @@ Templates in `references/reporting.md`. `scripts/scorecard.py` writes all three 
 
 Free checks need only HTTP and DNS. Paid checks use a scraping API; rank grids dominate the cost because they are priced per grid point **per keyword**. A 5x5 grid across six locations is 150 points for ONE keyword, and 450 for three. Multiply by keywords before quoting anything.
 
-Before spending: state the plan, the point count and the dollar estimate, and get a yes. Cap every run with the provider's own spend limit rather than trusting a loop to stop. Details and current pricing gotchas in `references/running-the-checks.md`.
+Before spending: state the plan, the point count and the dollar estimate, and get a yes. `apify_collect.py` bounds every run by its input (pages, places, reviews, grid points) and refuses to start a run that would push the total past `--budget-usd`; Apify will not accept a per-run cap under $0.50, so the input bounds are what really limit spend. **Match the grid by place ID, never by name:** a name match counts same-name branches nearby as the subject. The collector resolves each location's own listing from the places pull before it runs the grid. Details and pricing gotchas in `references/running-the-checks.md`.
 
 ## Inputs
 
@@ -81,10 +84,11 @@ Before spending: state the plan, the point count and the dollar estimate, and ge
 
 | Script | Does |
 |---|---|
-| `scripts/healthcheck.py` | Orchestrator. `--free` runs the 12 bundled no-cost checks and writes `out/run_log.json`; `--paid` adds the rest behind a confirmed budget |
+| `scripts/healthcheck.py` | Orchestrator. `--free` runs the 12 bundled no-cost checks and writes `out/run_log.json`; `--paid` adds the six Apify checks behind a confirmed budget when `APIFY_TOKEN` is set |
 | `scripts/fetch_signals.py` | Sitemap, robots.txt, llms.txt, headers, schema, tag detection, CMS fingerprint |
 | `scripts/email_auth.py` | SPF, DKIM selector probing, DMARC policy and enforcement level |
 | `scripts/content_similarity.py` | Page-to-page similarity across location and service pages, plus publish-timestamp batching |
+| `scripts/apify_collect.py` | Paid checks on Apify: plans and prices every run, runs them with `APIFY_TOKEN`, or assembles results fetched through the Apify MCP connector (`--plan-json`, `--import-dir`). Writes `out/apify__<domain>.json` with personal data removed |
 | `scripts/scorecard.py` | Applies `checks.json` rubrics; writes `out/scorecard.json` and `out/scorecard.md` (simple view, matrix, method note) |
 
 Run `tests/smoke.sh` after changing any script.

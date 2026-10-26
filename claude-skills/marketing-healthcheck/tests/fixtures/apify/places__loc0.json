@@ -1,0 +1,384 @@
+[
+ {
+  "title": "Kopê House",
+  "placeId": "ChIJX-cK-JWBhYARo3anVH2ZH2c",
+  "fid": "0x80858195f80ae75f:0x671f997d54a776a3",
+  "rank": 3,
+  "searchString": "coffee shop",
+  "totalScore": 4.9,
+  "reviewsCount": 98,
+  "categoryName": "Cafe",
+  "categories": [
+   "Cafe"
+  ],
+  "website": "https://www.kopehouse.com/",
+  "phone": "",
+  "address": "546 Laguna St, San Francisco, CA 94102",
+  "location": {
+   "lat": 37.7762214,
+   "lng": -122.4260612
+  },
+  "openingHours": [
+   {
+    "day": "Monday",
+    "hours": "8 AM to 2 PM"
+   },
+   {
+    "day": "Tuesday",
+    "hours": "8 AM to 2 PM"
+   },
+   {
+    "day": "Wednesday",
+    "hours": "8 AM to 2 PM"
+   },
+   {
+    "day": "Thursday",
+    "hours": "8 AM to 4 PM"
+   },
+   {
+    "day": "Friday",
+    "hours": "8 AM to 4 PM"
+   },
+   {
+    "day": "Saturday",
+    "hours": "8 AM to 4 PM"
+   },
+   {
+    "day": "Sunday",
+    "hours": "8 AM to 4 PM"
+   }
+  ],
+  "imagesCount": 78,
+  "questionsAndAnswers": [],
+  "claimThisBusiness": false,
+  "permanentlyClosed": false,
+  "temporarilyClosed": false,
+  "description": null,
+  "ownerDescription": "Kope House is our homage to the things we cherish most.",
+  "url": "https://www.google.com/maps/search/?api=1&query=Kop%C3%AA%20House&query_place_id=ChIJX-cK-JWBhYARo3anVH2ZH2c"
+ },
+ {
+  "title": "Blue Bottle Coffee",
+  "placeId": "ChIJSy28upiAhYARkoxpzFnW7b4",
+  "fid": "0x80858098babc2d4b:0xbeedd659cc698c92",
+  "rank": 1,
+  "searchString": "coffee shop",
+  "totalScore": 4.6,
+  "reviewsCount": 907,
+  "categoryName": "Coffee shop",
+  "categories": [
+   "Coffee shop"
+  ],
+  "website": "https://bluebottlecoffee.com/us/eng/northern-california-cafes?utm_source=google&utm_medium=organic&utm_campaign=cafe_business_listing_norcal",
+  "phone": "(510) 661-3510",
+  "address": "315 Linden St, San Francisco, CA 94102",
+  "location": {
+   "lat": 37.7763342,
+   "lng": -122.4232375
+  },
+  "openingHours": [
+   {
+    "day": "Monday",
+    "hours": "6:30 AM to 6:30 PM"
+   },
+   {
+    "day": "Tuesday",
+    "hours": "6:30 AM to 6:30 PM"
+   },
+   {
+    "day": "Wednesday",
+    "hours": "6:30 AM to 6:30 PM"
+   },
+   {
+    "day": "Thursday",
+    "hours": "6:30 AM to 6:30 PM"
+   },
+   {
+    "day": "Friday",
+    "hours": "6:30 AM to 7:30 PM"
+   },
+   {
+    "day": "Saturday",
+    "hours": "6:30 AM to 7:30 PM"
+   },
+   {
+    "day": "Sunday",
+    "hours": "6:30 AM to 7:30 PM"
+   }
+  ],
+  "imagesCount": 707,
+  "questionsAndAnswers": [
+   {
+    "question": "How would you describe the atmosphere?",
+    "askDate": null,
+    "answers": [
+     {
+      "answerDate": "a year ago",
+      "byOwner": false
+     }
+    ]
+   },
+   {
+    "question": "What type of seating options are available?",
+    "askDate": null,
+    "answers": [
+     {
+      "answerDate": "a year ago",
+      "byOwner": false
+     }
+    ]
+   },
+   {
+    "question": "Is there parking",
+    "askDate": "6 years ago",
+    "answers": [
+     {
+      "answerDate": "6 years ago",
+      "byOwner": true
+     }
+    ]
+   }
+  ],
+  "claimThisBusiness": false,
+  "permanentlyClosed": false,
+  "temporarilyClosed": false,
+  "description": "Trendy cafe chain offering upscale coffee drinks & pastries, plus beans & brewing equipment.",
+  "ownerDescription": "We create delicious, thoughtfully crafted coffee experiences.",
+  "url": "https://www.google.com/maps/search/?api=1&query=Blue%20Bottle%20Coffee&query_place_id=ChIJSy28upiAhYARkoxpzFnW7b4"
+ },
+ {
+  "title": "Ritual Coffee Roasters",
+  "placeId": "ChIJ70taCKKAhYARDqB5RsSPUJc",
+  "fid": "0x808580a2085a4bef:0x97508fc44679a00e",
+  "rank": 2,
+  "searchString": "coffee shop",
+  "totalScore": 4.4,
+  "reviewsCount": 569,
+  "categoryName": "Coffee shop",
+  "categories": [
+   "Coffee shop"
+  ],
+  "website": "http://ritualcoffee.com/",
+  "phone": "(415) 865-0989",
+  "address": "432 Octavia St B, San Francisco, CA 94102",
+  "location": {
+   "lat": 37.7763813,
+   "lng": -122.4241716
+  },
+  "openingHours": [
+   {
+    "day": "Monday",
+    "hours": "7 AM to 3:30 PM"
+   },
+   {
+    "day": "Tuesday",
+    "hours": "7 AM to 3:30 PM"
+   },
+   {
+    "day": "Wednesday",
+    "hours": "7 AM to 3:30 PM"
+   },
+   {
+    "day": "Thursday",
+    "hours": "7 AM to 3:30 PM"
+   },
+   {
+    "day": "Friday",
+    "hours": "7 AM to 3:30 PM"
+   },
+   {
+    "day": "Saturday",
+    "hours": "7 AM to 5 PM"
+   },
+   {
+    "day": "Sunday",
+    "hours": "7 AM to 1 PM"
+   }
+  ],
+  "imagesCount": 468,
+  "questionsAndAnswers": [
+   {
+    "question": "What are the Covid safety practices like here?",
+    "askDate": null,
+    "answers": [
+     {
+      "answerDate": "5 years ago",
+      "byOwner": true
+     }
+    ]
+   },
+   {
+    "question": "Do you have free wifi?",
+    "askDate": "6 years ago",
+    "answers": [
+     {
+      "answerDate": "6 years ago",
+      "byOwner": false
+     },
+     {
+      "answerDate": "6 years ago",
+      "byOwner": false
+     },
+     {
+      "answerDate": "6 years ago",
+      "byOwner": false
+     }
+    ]
+   },
+   {
+    "question": "Is it easy to find parking here?",
+    "askDate": "7 years ago",
+    "answers": [
+     {
+      "answerDate": "6 years ago",
+      "byOwner": false
+     }
+    ]
+   }
+  ],
+  "claimThisBusiness": false,
+  "permanentlyClosed": false,
+  "temporarilyClosed": false,
+  "description": "Artisanal coffeehouse chain that cultivates relationships with growers & roasts their beans on-site.",
+  "ownerDescription": "Ritual Coffee Roasters at Proxy",
+  "url": "https://www.google.com/maps/search/?api=1&query=Ritual%20Coffee%20Roasters&query_place_id=ChIJ70taCKKAhYARDqB5RsSPUJc"
+ },
+ {
+  "title": "Planet Cafe",
+  "placeId": "ChIJI1aNNZ-AhYARhbPQeOohxZs",
+  "fid": "0x8085809f358d5623:0x9bc521ea78d0b385",
+  "rank": 4,
+  "searchString": "coffee shop",
+  "totalScore": 4.5,
+  "reviewsCount": 68,
+  "categoryName": "Coffee shop",
+  "categories": [
+   "Coffee shop"
+  ],
+  "website": "http://www.planetcafedelivery.com/",
+  "phone": "(415) 553-4595",
+  "address": "244 Gough St, San Francisco, CA 94102",
+  "location": {
+   "lat": 37.7756705,
+   "lng": -122.4226296
+  },
+  "openingHours": [
+   {
+    "day": "Monday",
+    "hours": "7 AM to 1 PM"
+   },
+   {
+    "day": "Tuesday",
+    "hours": "7 AM to 1 PM"
+   },
+   {
+    "day": "Wednesday",
+    "hours": "7 AM to 1 PM"
+   },
+   {
+    "day": "Thursday",
+    "hours": "7 AM to 1 PM"
+   },
+   {
+    "day": "Friday",
+    "hours": "7 AM to 1 PM"
+   },
+   {
+    "day": "Saturday",
+    "hours": "Closed"
+   },
+   {
+    "day": "Sunday",
+    "hours": "Closed"
+   }
+  ],
+  "imagesCount": 79,
+  "questionsAndAnswers": [],
+  "claimThisBusiness": false,
+  "permanentlyClosed": false,
+  "temporarilyClosed": false,
+  "description": "Laid-back space serving classic American breakfast, lunchtime fare & weekend brunch.",
+  "ownerDescription": null,
+  "url": "https://www.google.com/maps/search/?api=1&query=Planet%20Cafe&query_place_id=ChIJI1aNNZ-AhYARhbPQeOohxZs"
+ },
+ {
+  "title": "Urban Ritual Cafe",
+  "placeId": "ChIJX7KNJy1-j4ARfn1gMtb2ryM",
+  "fid": "0x808f7e2d278db25f:0x23aff6d632607d7e",
+  "rank": 5,
+  "searchString": "coffee shop",
+  "totalScore": 4.4,
+  "reviewsCount": 501,
+  "categoryName": "Cafe",
+  "categories": [
+   "Cafe",
+   "Bubble tea store"
+  ],
+  "website": "http://www.urbanritualcafe.com/",
+  "phone": "(415) 374-7181",
+  "address": "488 Fell St, San Francisco, CA 94102",
+  "location": {
+   "lat": 37.7757014,
+   "lng": -122.4258572
+  },
+  "openingHours": [
+   {
+    "day": "Monday",
+    "hours": "12 to 10 PM"
+   },
+   {
+    "day": "Tuesday",
+    "hours": "12 to 10 PM"
+   },
+   {
+    "day": "Wednesday",
+    "hours": "12 to 10 PM"
+   },
+   {
+    "day": "Thursday",
+    "hours": "12 to 10 PM"
+   },
+   {
+    "day": "Friday",
+    "hours": "12 to 10 PM"
+   },
+   {
+    "day": "Saturday",
+    "hours": "12 to 10 PM"
+   },
+   {
+    "day": "Sunday",
+    "hours": "12 to 10 PM"
+   }
+  ],
+  "imagesCount": 649,
+  "questionsAndAnswers": [
+   {
+    "question": "Are dogs allowed?",
+    "askDate": "a year ago",
+    "answers": [
+     {
+      "answerDate": "a year ago",
+      "byOwner": false
+     }
+    ]
+   },
+   {
+    "question": "Do they take cash?",
+    "askDate": "3 years ago",
+    "answers": [
+     {
+      "answerDate": "3 years ago",
+      "byOwner": false
+     }
+    ]
+   }
+  ],
+  "claimThisBusiness": false,
+  "permanentlyClosed": false,
+  "temporarilyClosed": false,
+  "description": "Modern spot for artisanal tea & coffee drinks including boba options a few toast snacks.",
+  "ownerDescription": "We specialize in craft tea and boba cocktails",
+  "url": "https://www.google.com/maps/search/?api=1&query=Urban%20Ritual%20Cafe&query_place_id=ChIJX7KNJy1-j4ARfn1gMtb2ryM"
+ }
+]

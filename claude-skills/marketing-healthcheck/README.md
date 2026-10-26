@@ -1,6 +1,6 @@
 # Marketing Health Check
 
-**Version 1.0**
+**Version 1.1**
 
 Grade any company's digital marketing from the outside. No analytics access, no
 ad account, no agency cooperation, no NDA.
@@ -44,7 +44,7 @@ S3, and the `llms.txt` / schema / authorship signals behind them).
 | **[Claude Code](https://claude.com/claude-code)** | Required. Claude runs the scripts, judges the grey areas, and writes the report. |
 | **Python 3.9+** | Standard library only. Nothing to `pip install`. Pre-installed on macOS and most Linux; on Windows use `py -3`. |
 | **`dig` or `nslookup`** | For the email-authentication checks. Both scripts fall back to DNS-over-HTTPS with `--doh`. |
-| **A SERP / scraping account** | **Optional.** Only for the six paid checks (local rank grids, organic visibility, reviews). The skill runs and reports without them. |
+| **An [Apify](https://apify.com) account** | **Optional.** Only for the six paid checks (map-pack rank grids, Google rank, reviews). Use an API token, or the Apify MCP connector in Claude. The skill runs and reports without them. |
 
 ## Install
 
@@ -102,15 +102,64 @@ tracking, noindexed money pages, near-identical page sets, a dead publishing
 programme, and a list of third parties authorised to send mail as the domain
 that nobody can account for. That is usually the whole first conversation.
 
-**Paid tier (6 checks).** What the market does in response — rank grids,
-organic visibility, review corpora. **No paid provider ships with this skill.**
-`--paid` refuses to run without `--budget-usd`, prints the planned work and a
-cost estimate, and needs `--yes`. Without a configured provider it records the
-paid checks as `null` with a reason rather than guessing.
+**Paid tier (6 checks, on Apify).** What the market does in response: map-pack
+rank, Google rank, reviews. `--paid` refuses to run without `--budget-usd`,
+prints every run with its price, and spends nothing without `--yes`. With no
+Apify access it records the paid checks as `null` with a reason rather than
+guessing. Setup is below.
 
 **W1 (speed) sits outside both tiers.** Nothing here calls PageSpeed Insights.
 Run it yourself and put the metric values into `manual_results.json`, or it
 stays `null`.
+
+### Running the paid checks on Apify
+
+| Check | Apify actor | What it pulls |
+|---|---|---|
+| F1 map-pack rank | `fayoussef/geo-grid-local-rank-tracker` | an N×N grid of searches around each location's own coordinates |
+| F2, F3 Google rank, branded vs not | `apify/google-search-scraper` | one results page per category term, plus the business name |
+| T1, T3 reviews vs rivals, profile | `compass/crawler-google-places` | the business + 10 competitors around each location, with profile details |
+| T2 review replies | `compass/Google-Maps-Reviews-Scraper` | the newest 50 reviews, reviewer data switched off |
+
+**Typical cost: about $0.20 per location per keyword** (a 5×5 grid is $0.10 of
+it). One location and one keyword, the whole paid tier:
+
+```
+serp             F2/F3   $0.006  2 results pages
+places__loc0     T1/T3   $0.066  the business + 10 competitors
+reviews__loc0    T2      $0.025  newest 50 reviews
+grid__loc0__kw0  F1      $0.100  5x5 grid = 25 points
+Estimated total: $0.20
+```
+
+**With an API token** (apify.com → Settings → API & Integrations):
+
+```bash
+export APIFY_TOKEN=...
+python3 scripts/healthcheck.py --targets targets.json --paid --budget-usd 5          # plan, $0
+python3 scripts/healthcheck.py --targets targets.json --paid --budget-usd 5 --yes    # run
+```
+
+**With the Apify MCP connector instead of a token**, just ask Claude to run the
+paid checks. It runs `apify_collect.py --plan-json`, calls each actor through
+the connector, saves the results, and assembles them with `--import-dir`. Same
+output, same scores.
+
+Three things the collector does so you don't have to:
+
+- **Matches your listing by place ID, not name.** In testing, a name-matched
+  grid for one Blue Bottle Coffee café counted a *different* Blue Bottle branch
+  at 3 of 9 points. The collector finds each location's own listing first and
+  hands the grid its exact ID.
+- **Bounds spend by the input, not a cap.** Apify won't accept a per-run cap
+  under $0.50, so every run is limited by pages, places, reviews and grid points,
+  and the collector won't start a run that would take the total past your budget.
+- **Keeps no personal data.** No reviewer names, no review text, no Q&A authors.
+  Only stars, dates, and whether the owner replied.
+
+**Write keywords the way a local customer searches**, with the city
+(`dentist austin`, not `dentist`). Google rank is checked from the US without a
+location, so a bare category term measures national results.
 
 ### Grid arithmetic, before you spend anything
 
@@ -186,8 +235,11 @@ marketing-healthcheck/
 │  ├─ fetch_signals.py           sitemap, robots, llms.txt, headers, schema, tags
 │  ├─ email_auth.py              SPF, DKIM selector probing, DMARC enforcement
 │  ├─ content_similarity.py      page-to-page similarity, publish batching
+│  ├─ apify_collect.py           paid checks on Apify: plan, run, or import
 │  └─ scorecard.py               rubrics → scorecard.json + scorecard.md
-└─ tests/smoke.sh                83 assertions; run after any script change
+└─ tests/
+   ├─ smoke.sh                   92 assertions; run after any script change
+   └─ fixtures/apify/            real actor output, personal data removed
 ```
 
 ## Etiquette and legality
@@ -195,11 +247,16 @@ marketing-healthcheck/
 Everything here reads **public pages the way a browser does**, at a throttled
 rate, identifying itself with the contact address in `HEALTHCHECK_CONTACT`. It
 does not log in, bypass a paywall, solve a challenge, or touch anything behind
-authentication. Keep `--delay` where it is. You are responsible for the terms
-of any paid provider you add.
+authentication. Keep `--delay` where it is. The paid checks use third-party
+Apify actors; you are responsible for your Apify account and its terms.
 
 ## Changelog
 
+- **1.1** — Paid checks run on Apify. New `apify_collect.py` (plan, run with a
+  token, or assemble results from the Apify MCP connector), scorers for F1, F2,
+  F3, T1, T2 and T3, place-ID matching for the geo-grid, personal data removed
+  at collection, fixtures from real runs, a mock Apify API in the tests, and
+  fix-first advice for the paid checks. 92-assertion smoke suite.
 - **1.0** — Initial release. 20 checks, 12 scored free, budget-gated paid tier,
   raw response cache, three-artifact report, 83-assertion smoke suite.
 

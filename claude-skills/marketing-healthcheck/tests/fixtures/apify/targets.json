@@ -1,0 +1,20 @@
+{
+ "subjects": [
+  {
+   "name": "Blue Bottle Coffee",
+   "domain": "bluebottlecoffee.com",
+   "category": "specialty coffee",
+   "keywords": [
+    "coffee shop hayes valley san francisco"
+   ],
+   "locations": [
+    {
+     "label": "Hayes Valley",
+     "lat": 37.7764,
+     "lng": -122.4231,
+     "place_id": "ChIJSy28upiAhYARkoxpzFnW7b4"
+    }
+   ]
+  }
+ ]
+}
